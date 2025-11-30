@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Runph\Services\Config;
 
+use Runph\Services\Config\Exceptions\InvalidConfigFileException;
 use Runph\Services\Filesystem\Filesystem;
-use RuntimeException;
 
 class ConfigLoader
 {
@@ -36,7 +36,7 @@ class ConfigLoader
         $config = $this->filesystem->requireFile($path);
 
         if (! is_array($config)) {
-            throw new RuntimeException("Config file '{$path}' must return an array, " . gettype($config) . ' returned');
+            throw new InvalidConfigFileException($path, $config);
         }
 
         return $config;
