@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Runph\Services\Container;
 
-use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
+use Runph\Services\Container\Exceptions\ServiceClassNotFoundException;
 use RuntimeException;
 
 class ReflectionResolver
@@ -22,7 +22,7 @@ class ReflectionResolver
     public function get(string $id): mixed
     {
         if (! class_exists($id)) {
-            throw new InvalidArgumentException("No entry was found for the identifier '{$id}' in the " . self::class);
+            throw new ServiceClassNotFoundException($id);
         }
 
         $this->current = $id;
