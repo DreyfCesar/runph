@@ -24,6 +24,9 @@
     ],
     "minimum-stability": "stable",
     "scripts": {
+        "app": [
+            "@php ./bin/runph"
+        ],
         "fix": [
             "@php ./vendor/bin/php-cs-fixer fix"
         ],
