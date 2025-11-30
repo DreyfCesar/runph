@@ -11,14 +11,25 @@ class Container implements ContainerInterface
     /** @var mixed[] */
     private array $services = [];
 
-    public function set(string $id, mixed $value): void
+    private ReflectionResolver $reflectionResolver;
+
+    public function __construct()
     {
-        $this->services[$id] = $value;
+        $this->reflectionResolver = new ReflectionResolver($this);
     }
 
-    public function get(string $id)
+    public function set(string $id, mixed $value): mixed
     {
-        return $this->services[$id];
+        return $this->services[$id] = $value;
+    }
+
+    public function get(string $id): mixed
+    {
+        if ($this->has($id)) {
+            return $this->services[$id];
+        }
+
+        return $this->set($id, $this->reflectionResolver->get($id));
     }
 
     public function has(string $id): bool
