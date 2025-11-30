@@ -15,7 +15,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Runph\\": "src/"
+            "Runph\\": "src/",
+            "Tests\\": "tests/"
         }
     },
     "authors": [
