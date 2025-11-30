@@ -23,6 +23,13 @@ class Container implements ContainerInterface
         return $this->services[$id] = $value;
     }
 
+    /**
+     * @template T of object
+     *
+     * @param class-string<T> $id
+     *
+     * @return T
+     */
     public function get(string $id): mixed
     {
         if ($this->has($id)) {

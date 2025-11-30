@@ -18,7 +18,6 @@ $container->set(ConfigLoader::class, new ConfigLoader(dirname(__DIR__) . '/confi
 
 $application = new Application('Runph', '[dev]');
 
-/** @var CommandsAutoloader */
 $commandsAutoloader = $container->get(CommandsAutoloader::class);
 $commandsAutoloader->registerCommands($application);
 
