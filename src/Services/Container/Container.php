@@ -32,6 +32,8 @@ class Container implements ContainerInterface
      */
     public function get(string $id): mixed
     {
+        $service = null;
+
         if ($this->has($id)) {
             $service = $this->services[$id];
 
