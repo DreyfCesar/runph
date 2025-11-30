@@ -33,10 +33,16 @@ class Container implements ContainerInterface
     public function get(string $id): mixed
     {
         if ($this->has($id)) {
-            return $this->services[$id];
+            $service = $this->services[$id];
+
+            assert($service instanceof $id);
+            return $service;
         }
 
-        return $this->set($id, $this->reflectionResolver->get($id));
+        $service = $this->set($id, $this->reflectionResolver->get($id));
+        assert($service instanceof $id);
+
+        return $service;
     }
 
     public function has(string $id): bool
