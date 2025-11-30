@@ -9,7 +9,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
 use Runph\Services\Container\Exceptions\ServiceClassNotFoundException;
-use RuntimeException;
+use Runph\Services\Container\Exceptions\UnresolvableDependencyException;
 
 class ReflectionResolver
 {
@@ -54,7 +54,7 @@ class ReflectionResolver
                     continue;
                 }
 
-                throw new RuntimeException("Cannot resolve the parameter '{$param->getName()}' for service '{$this->current}'");
+                throw new UnresolvableDependencyException($param->getName(), $this->current);
             }
 
             $params[] = $this->container->get($type->getName());
