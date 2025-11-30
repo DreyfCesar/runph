@@ -4,7 +4,7 @@
 declare(strict_types=1);
 
 use Psr\Container\ContainerInterface;
-use Runph\Commands\Play\PlayCommand;
+use Runph\Services\Config\ConfigLoader;
 use Runph\Services\Container\Container;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
@@ -15,13 +15,15 @@ require __DIR__ . '/../vendor/autoload.php';
 $container = new Container();
 $container->set(ContainerInterface::class, $container);
 
+/** @var ConfigLoader */
+$config = $container->set(ConfigLoader::class, new ConfigLoader(dirname(__DIR__) . '/config'));
+
 $application = new Application('Runph', '[dev]');
 
-$defaultCommands = [
-    PlayCommand::class,
-];
+/** @var string[] */
+$commands = $config->load('commands');
 
-foreach ($defaultCommands as $commandClassname) {
+foreach ($commands as $commandClassname) {
     $command = $container->get($commandClassname);
 
     if (! $command instanceof Command) {
