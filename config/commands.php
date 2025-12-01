@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Runph\Commands\Play\PlayCommand;
+use Runph\Commands\PlayCommand;
 
 return [
     PlayCommand::class,
