@@ -6,10 +6,11 @@ namespace Runph\Services\Container;
 
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
+use ReflectionIntersectionType;
 use ReflectionMethod;
-use ReflectionNamedType;
 use Runph\Services\Container\Exceptions\ServiceClassNotFoundException;
 use Runph\Services\Container\Exceptions\UnresolvableDependencyException;
+use Runph\Services\Container\Exceptions\UnsupportedIntersectionTypeException;
 
 class ReflectionResolver
 {
@@ -54,7 +55,11 @@ class ReflectionResolver
             $type = $param->getType();
             $name = $param->getName();
 
-            if (! $type instanceof ReflectionNamedType || $type->isBuiltin()) {
+            if ($type instanceof ReflectionIntersectionType) {
+                throw new UnsupportedIntersectionTypeException($name, $this->classname);
+            }
+
+            if ($type->isBuiltin()) {
                 if ($param->isDefaultValueAvailable()) {
                     $params[] = $param->getDefaultValue();
                     continue;
