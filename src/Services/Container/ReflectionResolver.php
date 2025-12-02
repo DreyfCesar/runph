@@ -13,7 +13,7 @@ use Runph\Services\Container\Exceptions\UnresolvableDependencyException;
 
 class ReflectionResolver
 {
-    private string $current = '';
+    private string $classname = '';
 
     public function __construct(
         private ContainerInterface $container,
@@ -28,7 +28,7 @@ class ReflectionResolver
             throw new ServiceClassNotFoundException($id);
         }
 
-        $this->current = $id;
+        $this->classname = $id;
         $reflection = new ReflectionClass($id);
         $constructor = $reflection->getConstructor();
 
@@ -52,6 +52,7 @@ class ReflectionResolver
 
         foreach ($constructor->getParameters() as $param) {
             $type = $param->getType();
+            $name = $param->getName();
 
             if (! $type instanceof ReflectionNamedType || $type->isBuiltin()) {
                 if ($param->isDefaultValueAvailable()) {
@@ -59,7 +60,7 @@ class ReflectionResolver
                     continue;
                 }
 
-                throw new UnresolvableDependencyException($param->getName(), $this->current);
+                throw new UnresolvableDependencyException($name, $this->classname);
             }
 
             $params[] = $this->container->get($type->getName());
