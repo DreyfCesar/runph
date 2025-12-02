@@ -19,7 +19,10 @@ class ReflectionResolver
         private ContainerInterface $container,
     ) {}
 
-    public function get(string $id): mixed
+    /**
+     * @param array<string, mixed> $parameters
+     */
+    public function get(string $id, array $parameters = []): mixed
     {
         if (! class_exists($id)) {
             throw new ServiceClassNotFoundException($id);
@@ -33,15 +36,17 @@ class ReflectionResolver
             return new $id();
         }
 
-        $params = $this->resolveConstructorParameters($constructor);
+        $params = $this->resolveConstructorParameters($constructor, $parameters);
 
         return $reflection->newInstanceArgs($params);
     }
 
     /**
+     * @param array<string, mixed> $parameters
+     *
      * @return mixed[]
      */
-    private function resolveConstructorParameters(ReflectionMethod $constructor): array
+    private function resolveConstructorParameters(ReflectionMethod $constructor, array $parameters): array
     {
         $params = [];
 
