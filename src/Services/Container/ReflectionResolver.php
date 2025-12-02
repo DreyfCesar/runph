@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Runph\Services\Container;
 
+use LogicException;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionIntersectionType;
 use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionUnionType;
 use Runph\Services\Container\Exceptions\ServiceClassNotFoundException;
 use Runph\Services\Container\Exceptions\UnresolvableDependencyException;
 use Runph\Services\Container\Exceptions\UnsupportedIntersectionTypeException;
@@ -21,7 +24,12 @@ class ReflectionResolver
     ) {}
 
     /**
+     * @template T of object
+     *
+     * @param class-string<T> $id
      * @param array<string, mixed> $parameters
+     *
+     * @return T
      */
     public function get(string $id, array $parameters = []): mixed
     {
@@ -52,23 +60,70 @@ class ReflectionResolver
         $params = [];
 
         foreach ($constructor->getParameters() as $param) {
-            $type = $param->getType();
-            $name = $param->getName();
+            $paramName = $param->getName();
+            $paramType = $param->getType();
+            $existsInParameters = array_key_exists($paramName, $parameters);
 
-            if ($type instanceof ReflectionIntersectionType) {
-                throw new UnsupportedIntersectionTypeException($name, $this->classname);
+            if ($param->isDefaultValueAvailable() && ! $existsInParameters) {
+                $params[] = $param->getDefaultValue();
+                continue;
             }
 
-            if ($type->isBuiltin()) {
-                if ($param->isDefaultValueAvailable()) {
-                    $params[] = $param->getDefaultValue();
-                    continue;
+            if ($paramType instanceof ReflectionIntersectionType) {
+                throw new UnsupportedIntersectionTypeException($paramName, $this->classname);
+            }
+
+            if ($paramType instanceof ReflectionNamedType && ! $paramType->isBuiltin()) {
+                $params[] = $this->container->get($paramType->getName());
+                continue;
+            }
+
+            if ($existsInParameters) {
+                $value = $parameters[$paramName];
+                $hasMixedType = is_null($paramType);
+                $matchedType = false;
+                $enabledTypes = [];
+
+                if ($paramType) {
+                    if ($paramType instanceof ReflectionUnionType) {
+                        foreach ($paramType->getTypes() as $type) {
+                            if ($type instanceof ReflectionIntersectionType) {
+                                throw new UnsupportedIntersectionTypeException($paramName, $this->classname);
+                            }
+
+                            $enabledTypes[] = $type->getName();
+                        }
+                    } else {
+                        if (! $paramType instanceof ReflectionNamedType) {
+                            throw new LogicException('Unexpected ReflectionType');
+                        }
+
+                        $enabledTypes[] = $paramType->getName();
+                    }
+
+                    if (! $hasMixedType) {
+                        foreach ($enabledTypes as $type) {
+                            if ($type === 'mixed') {
+                                $hasMixedType = true;
+                                break;
+                            }
+
+                            $typeCheckFn = "is_{$type}";
+                            if (function_exists($typeCheckFn) && $typeCheckFn($value)) {
+                                $matchedType = true;
+                                break;
+                            }
+                        }
+                    }
                 }
 
-                throw new UnresolvableDependencyException($name, $this->classname);
+                if ($hasMixedType || $matchedType) {
+                    $params[] = $value;
+                    continue;
+                }
             }
 
-            $params[] = $this->container->get($type->getName());
+            throw new UnresolvableDependencyException($paramName, $this->classname);
         }
 
         return $params;

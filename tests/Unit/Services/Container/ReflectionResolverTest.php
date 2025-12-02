@@ -31,6 +31,7 @@ class ReflectionResolverTest extends TestCase
     {
         $this->expectException(ServiceClassNotFoundException::class);
 
+        // @phpstan-ignore-next-line
         $this->resolver->get('UnexistentClass');
     }
 
