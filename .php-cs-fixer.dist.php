@@ -18,7 +18,10 @@ return (new Config())
     ->setFinder(
         (new Finder())
             // 💡 root folder to check
+            ->in(__DIR__.'/bin')
             ->in(__DIR__.'/src')
+            ->in(__DIR__.'/tests')
+            ->in(__DIR__.'/config')
             ->name('*.php')
             ->ignoreVCS(true)
             ->ignoreDotFiles(true)

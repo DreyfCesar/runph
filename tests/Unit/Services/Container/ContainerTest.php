@@ -13,7 +13,7 @@ class ContainerTest extends TestCase
     public function testSetStoresAndReturnsService(): void
     {
         $container = new Container();
-        $service = new stdClass;
+        $service = new stdClass();
 
         $result = $container->set(stdClass::class, $service);
 

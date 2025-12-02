@@ -17,7 +17,7 @@ $container = new Container();
 $container->set(ContainerInterface::class, $container);
 
 $container->set(
-    ConfigLoader::class, 
+    ConfigLoader::class,
     new ConfigLoader(
         $container->get(Filesystem::class),
         dirname(__DIR__) . '/config'
