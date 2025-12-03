@@ -11,12 +11,9 @@ class Container implements ContainerInterface
     /** @var mixed[] */
     private array $services = [];
 
-    private ReflectionResolver $reflectionResolver;
-
-    public function __construct()
-    {
-        $this->reflectionResolver = new ReflectionResolver($this);
-    }
+    public function __construct(
+        private ReflectionResolver $reflectionResolver
+    ) {}
 
     public function set(string $id, mixed $value): mixed
     {
@@ -32,23 +29,43 @@ class Container implements ContainerInterface
      */
     public function get(string $id): mixed
     {
-        $service = null;
+        return $this->resolve($id);
+    }
 
-        if ($this->has($id)) {
-            $service = $this->services[$id];
-
-            assert($service instanceof $id);
-            return $service;
-        }
-
-        $service = $this->set($id, $this->reflectionResolver->get($id));
-        assert($service instanceof $id);
-
-        return $service;
+    /**
+     * @template T of object
+     *
+     * @param class-string<T> $id
+     * @param array<string, mixed> $parameters
+     *
+     * @return T
+     */
+    public function make(string $id, array $parameters): object
+    {
+        return $this->resolve($id, $parameters);
     }
 
     public function has(string $id): bool
     {
         return isset($this->services[$id]);
+    }
+
+    /**
+     * @template T of object
+     *
+     * @param class-string<T> $id
+     * @param array<string, mixed> $parameters
+     *
+     * @return T
+     */
+    private function resolve(string $id, array $parameters = []): mixed
+    {
+        if ($this->has($id)) {
+            /** @var T */
+            return $this->services[$id];
+        }
+
+        /** @var T */
+        return $this->set($id, $this->reflectionResolver->get($id, $parameters));
     }
 }
