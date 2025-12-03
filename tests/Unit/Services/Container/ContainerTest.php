@@ -4,62 +4,69 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Container;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Runph\Services\Container\Container;
+use Runph\Services\Container\ReflectionResolver;
 use stdClass;
 
 class ContainerTest extends TestCase
 {
+    private Container $container;
+
+    /** @var MockObject&ReflectionResolver */
+    private ReflectionResolver $reflectionResolver;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->reflectionResolver = $this->createMock(ReflectionResolver::class);
+        $this->container = new Container($this->reflectionResolver);
+    }
+
     public function testSetStoresAndReturnsService(): void
     {
-        $container = new Container();
         $service = new stdClass();
-
-        $result = $container->set(stdClass::class, $service);
+        $result = $this->container->set(stdClass::class, $service);
 
         $this->assertSame($service, $result);
     }
 
     public function testHasReturnsTrueWhenServiceExists(): void
     {
-        $container = new Container();
-        $container->set('foo', 123);
+        $this->container->set('foo', 123);
 
-        $this->assertTrue($container->has('foo'));
+        $this->assertTrue($this->container->has('foo'));
     }
 
     public function testHasReturnsFalseWhenServiceDoesNotExist(): void
     {
-        $container = new Container();
-        $this->assertFalse($container->has('undefined'));
+        $this->assertFalse($this->container->has('undefined'));
     }
 
     public function testGetReturnsPreviouslyStoredService(): void
     {
-        $container = new Container();
         $service = new stdClass();
 
-        $container->set(stdClass::class, $service);
-        $result = $container->get(stdClass::class);
+        $this->container->set(stdClass::class, $service);
+        $result = $this->container->get(stdClass::class);
 
         $this->assertSame($service, $result);
     }
 
-    public function testGetBuildsNewServiceViaReflection(): void
+    public function testGetDelegatesResolutionToReflectionResolver(): void
     {
-        $container = new Container();
-        $result = $container->get(stdClass::class);
+        $service = new stdClass();
 
-        $this->assertInstanceOf(stdClass::class, $result);
-    }
+        $this->reflectionResolver
+            ->expects($this->once())
+            ->method('get')
+            ->with(stdClass::class)
+            ->willReturn($service);
 
-    public function testGetCachesResolvedServices(): void
-    {
-        $container = new Container();
+        $result = $this->container->get(stdClass::class);
 
-        $first = $container->get(stdClass::class);
-        $second = $container->get(stdClass::class);
-
-        $this->assertSame($first, $second);
+        $this->assertSame($service, $result);
     }
 }

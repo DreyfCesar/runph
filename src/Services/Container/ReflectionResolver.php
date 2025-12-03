@@ -18,10 +18,12 @@ use Runph\Services\Container\Exceptions\UnsupportedIntersectionTypeException;
 class ReflectionResolver
 {
     private string $classname = '';
+    private ContainerInterface $container;
 
-    public function __construct(
-        private ContainerInterface $container,
-    ) {}
+    public function setContainer(ContainerInterface $container): void
+    {
+        $this->container = $container;
+    }
 
     /**
      * @template T of object

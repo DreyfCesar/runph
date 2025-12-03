@@ -24,7 +24,8 @@ class ReflectionResolverTest extends TestCase
         parent::setUp();
 
         $this->container = $this->createMock(ContainerInterface::class);
-        $this->resolver = new ReflectionResolver($this->container);
+        $this->resolver = new ReflectionResolver();
+        $this->resolver->setContainer($this->container);
     }
 
     public function testItThrowsWhenTheClassDoesNotExist(): void

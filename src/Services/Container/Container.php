@@ -11,12 +11,9 @@ class Container implements ContainerInterface
     /** @var mixed[] */
     private array $services = [];
 
-    private ReflectionResolver $reflectionResolver;
-
-    public function __construct()
-    {
-        $this->reflectionResolver = new ReflectionResolver($this);
-    }
+    public function __construct(
+        private ReflectionResolver $reflectionResolver
+    ) {}
 
     public function set(string $id, mixed $value): mixed
     {
@@ -43,7 +40,7 @@ class Container implements ContainerInterface
      *
      * @return T
      */
-    public function make(string $id, array $parameters): mixed
+    public function make(string $id, array $parameters): object
     {
         return $this->resolve($id, $parameters);
     }
@@ -63,18 +60,12 @@ class Container implements ContainerInterface
      */
     private function resolve(string $id, array $parameters = []): mixed
     {
-        $service = null;
-
         if ($this->has($id)) {
-            $service = $this->services[$id];
-
-            assert($service instanceof $id);
-            return $service;
+            /** @var T */
+            return $this->services[$id];
         }
 
-        $service = $this->set($id, $this->reflectionResolver->get($id, $parameters));
-        assert($service instanceof $id);
-
-        return $service;
+        /** @var T */
+        return $this->set($id, $this->reflectionResolver->get($id, $parameters));
     }
 }
