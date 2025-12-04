@@ -7,6 +7,7 @@ use Psr\Container\ContainerInterface;
 use Runph\Services\CommandsAutoloader;
 use Runph\Services\Config\ConfigLoader;
 use Runph\Services\Container\Container;
+use Runph\Services\Container\Contracts\FactoryContainerInterface;
 use Runph\Services\Container\ReflectionResolver;
 use Runph\Services\Filesystem\Filesystem;
 use Symfony\Component\Console\Application;
@@ -19,6 +20,7 @@ $container = new Container($reflection);
 
 $reflection->setContainer($container);
 $container->set(ContainerInterface::class, $container);
+$container->set(FactoryContainerInterface::class, $container);
 
 $container->set(
     ConfigLoader::class,
