@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Runph\Services\Container;
 
 use Psr\Container\ContainerInterface;
+use Runph\Services\Container\Contracts\FactoryContainerInterface;
 
-class Container implements ContainerInterface
+class Container implements ContainerInterface, FactoryContainerInterface
 {
     /** @var mixed[] */
     private array $services = [];
@@ -36,7 +37,7 @@ class Container implements ContainerInterface
      * @template T of object
      *
      * @param class-string<T> $id
-     * @param array<string, mixed> $parameters
+     * @param array<mixed, mixed> $parameters
      *
      * @return T
      */
@@ -54,7 +55,7 @@ class Container implements ContainerInterface
      * @template T of object
      *
      * @param class-string<T> $id
-     * @param array<string, mixed> $parameters
+     * @param array<mixed, mixed> $parameters
      *
      * @return T
      */
