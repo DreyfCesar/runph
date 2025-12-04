@@ -29,7 +29,7 @@ class ReflectionResolver
      * @template T of object
      *
      * @param class-string<T> $id
-     * @param array<string, mixed> $parameters
+     * @param array<mixed, mixed> $parameters
      *
      * @return T
      */
@@ -53,7 +53,7 @@ class ReflectionResolver
     }
 
     /**
-     * @param array<string, mixed> $parameters
+     * @param array<mixed, mixed> $parameters
      *
      * @return mixed[]
      */
