@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Runph\Services\Container\Exceptions\UnresolvableDependencyException;
+use Runph\Services\Container\Exceptions\InvalidParameterTypeException;
 use Runph\Services\Container\ReflectionResolver;
 
 class ReflectionResolverParametersTest extends TestCase
@@ -80,8 +80,15 @@ class ReflectionResolverParametersTest extends TestCase
     #[DataProvider('invalidParameterProvider')]
     public function testItThrowsWhenProvidedParameterDoesNotMatchType(string $class, array $params): void
     {
-        $this->expectException(UnresolvableDependencyException::class);
-        $this->resolver->get($class, $params);
+        try {
+            $this->resolver->get($class, $params);
+            $this->fail('Expected InvalidParameterTypeException not thrown.');
+        } catch (InvalidParameterTypeException $e) {
+            $this->assertNotEmpty($e->expectedTypes);
+            $this->assertSame($class, $e->className);
+            $this->assertSame('value', $e->paramName);
+            $this->assertSame(gettype($params['value']), $e->paramType);
+        }
     }
 
     /**
