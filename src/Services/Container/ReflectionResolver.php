@@ -11,6 +11,7 @@ use ReflectionIntersectionType;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionUnionType;
+use Runph\Services\Container\Exceptions\InvalidParameterTypeException;
 use Runph\Services\Container\Exceptions\ServiceClassNotFoundException;
 use Runph\Services\Container\Exceptions\UnresolvableDependencyException;
 use Runph\Services\Container\Exceptions\UnsupportedIntersectionTypeException;
@@ -119,10 +120,12 @@ class ReflectionResolver
                     }
                 }
 
-                if ($hasMixedType || $matchedType) {
-                    $params[] = $value;
-                    continue;
+                if (! $hasMixedType && ! $matchedType) {
+                    throw new InvalidParameterTypeException($param, $enabledTypes, gettype($value));
                 }
+
+                $params[] = $value;
+                continue;
             }
 
             throw new UnresolvableDependencyException($paramName, $this->classname);
