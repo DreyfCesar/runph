@@ -30,7 +30,13 @@ class Container implements ContainerInterface, FactoryContainerInterface
      */
     public function get(string $id): mixed
     {
-        return $this->resolve($id);
+        if ($this->has($id)) {
+            /** @var T */
+            return $this->services[$id];
+        }
+
+        /** @var T */
+        return $this->set($id, $this->reflectionResolver->get($id));
     }
 
     /**
@@ -43,30 +49,11 @@ class Container implements ContainerInterface, FactoryContainerInterface
      */
     public function make(string $id, array $parameters): object
     {
-        return $this->resolve($id, $parameters);
+        return $this->reflectionResolver->get($id, $parameters);
     }
 
     public function has(string $id): bool
     {
         return isset($this->services[$id]);
-    }
-
-    /**
-     * @template T of object
-     *
-     * @param class-string<T> $id
-     * @param array<mixed, mixed> $parameters
-     *
-     * @return T
-     */
-    private function resolve(string $id, array $parameters = []): mixed
-    {
-        if ($this->has($id)) {
-            /** @var T */
-            return $this->services[$id];
-        }
-
-        /** @var T */
-        return $this->set($id, $this->reflectionResolver->get($id, $parameters));
     }
 }
