@@ -69,4 +69,19 @@ class ContainerTest extends TestCase
 
         $this->assertSame($service, $result);
     }
+
+    public function testMakeDoesNotCacheInstance(): void
+    {
+        $this->reflectionResolver
+            ->method('get')
+            ->with(stdClass::class, [])
+            ->willReturnCallback(fn () => new stdClass());
+
+        $instance1 = $this->container->make(stdClass::class, []);
+        $instance2 = $this->container->make(stdClass::class, []);
+
+        $this->assertInstanceOf(stdClass::class, $instance1);
+        $this->assertInstanceOf(stdClass::class, $instance2);
+        $this->assertNotSame($instance1, $instance2, 'make() should return a new instance each time and not cache it');
+    }
 }
