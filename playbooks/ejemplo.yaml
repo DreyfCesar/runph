@@ -5,3 +5,4 @@ name: Nombre del playbook
 tasks:
 
     - name: Primera tarea
+      log: mostrame
