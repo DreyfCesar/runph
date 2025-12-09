@@ -5,11 +5,23 @@ declare(strict_types=1);
 namespace Runph\Playbook\Modules\Directives;
 
 use Runph\Playbook\Contracts\ModuleInterface;
+use Runph\Playbook\Exceptions\MissingModuleException;
+use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
+use Runph\Playbook\ModuleRunner;
+use Runph\Services\Config\ConfigLoader;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 
 class TasksDirective implements ModuleInterface
 {
+    /** @var string[] */
+    public const KEYWORDS = [
+        'name',
+    ];
+
+    /** @var array<string, class-string<ModuleInterface>> */
+    private array $modules;
+
     /**
      * @param array<string, mixed>[] $value
      */
@@ -17,12 +29,19 @@ class TasksDirective implements ModuleInterface
         private array $value,
         private OutputInterface $output,
         private Terminal $terminal,
-    ) {}
+        private ModuleRunner $moduleRunner,
+        ConfigLoader $configLoader,
+    ) {
+        /** @var array<string, class-string<ModuleInterface>> */
+        $modules = $configLoader->load('tasks');
+        $this->modules = $modules;
+    }
 
     public function run(): void
     {
         foreach ($this->value as $id => $task) {
-            $this->getAndPrintName($task, $id);
+            $taskName = $this->getAndPrintName($task, $id);
+            $this->executeModule($task, $taskName);
         }
     }
 
@@ -43,5 +62,24 @@ class TasksDirective implements ModuleInterface
         $this->output->writeln("<info>{$label}</> " . str_repeat('*', $stars));
 
         return $name;
+    }
+
+    /**
+     * @param array<string, mixed> $task
+     */
+    public function executeModule(array $task, string $taskName): void
+    {
+        $taskModules = array_diff_key($task, array_flip(self::KEYWORDS));
+        $modulesCount = count($taskModules);
+
+        if ($modulesCount < 1) {
+            throw new MissingModuleException($taskName);
+        }
+
+        if ($modulesCount > 1) {
+            throw new MultipleModuleInTaskException($taskName);
+        }
+
+        $this->moduleRunner->run($taskModules, $this->modules);
     }
 }
