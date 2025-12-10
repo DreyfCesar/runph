@@ -1,3 +1,7 @@
 # Playbook de Ejemplo
 
 name: Nombre del playbook
+
+tasks:
+
+    - name: Primera tarea
