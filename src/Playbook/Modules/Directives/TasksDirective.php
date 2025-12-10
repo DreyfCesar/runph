@@ -7,6 +7,7 @@ namespace Runph\Playbook\Modules\Directives;
 use Runph\Playbook\Contracts\ModuleInterface;
 use Runph\Playbook\Exceptions\MissingModuleException;
 use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
+use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
 use Runph\Playbook\ModuleRunner;
 use Runph\Services\Config\ConfigLoader;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -17,6 +18,7 @@ class TasksDirective implements ModuleInterface
     /** @var string[] */
     public const KEYWORDS = [
         'name',
+        'when',
     ];
 
     /** @var array<string, class-string<ModuleInterface>> */
@@ -41,7 +43,10 @@ class TasksDirective implements ModuleInterface
     {
         foreach ($this->value as $id => $task) {
             $taskName = $this->getAndPrintName($task, $id);
-            $this->executeModule($task, $taskName);
+
+            if ($this->shouldRunTask($task)) {
+                $this->executeModule($task, $taskName);
+            }
         }
     }
 
@@ -81,5 +86,23 @@ class TasksDirective implements ModuleInterface
         }
 
         $this->moduleRunner->run($taskModules, $this->modules);
+    }
+
+    /**
+     * @param array<string, mixed> $task
+     */
+    public function shouldRunTask(array $task): bool
+    {
+        if (isset($task['when'])) {
+            $condition = $task['when'];
+
+            if (is_bool($condition)) {
+                return $condition;
+            }
+
+            throw new UnsupportedWhenTypeException(gettype($task['when']));
+        }
+
+        return true;
     }
 }

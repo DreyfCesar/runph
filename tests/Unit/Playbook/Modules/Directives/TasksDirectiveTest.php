@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Runph\Playbook\Modules\Directives;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Runph\Playbook\Exceptions\MissingModuleException;
 use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
+use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
 use Runph\Playbook\ModuleRunner;
 use Runph\Playbook\Modules\Directives\TasksDirective;
 use Runph\Services\Config\ConfigLoader;
@@ -128,6 +130,70 @@ final class TasksDirectiveTest extends TestCase
             $this->assertStringContainsString($name, $bufferedOutput);
         }
 
+    }
+
+    /**
+     * @param array<string, mixed> $task
+     */
+    #[DataProvider('whenConditionalProvider')]
+    public function testModuleRunsBasedOnWhenCondition(array $task, bool $pass): void
+    {
+        $tasks = [['fake_module' => 'something'] + $task];
+
+        $this->moduleRunner
+            ->expects($pass ? $this->once() : $this->never())
+            ->method('run');
+
+        $tasksDirective = $this->createTasksDirective($tasks);
+
+        $tasksDirective->run();
+    }
+
+    /**
+     * @return array<string, mixed[]>
+     */
+    public static function whenConditionalProvider(): array
+    {
+        return [
+            'no when condition' => [
+                'task' => [],
+                'pass' => true,
+            ],
+            'boolean true' => [
+                'task' => ['when' => true],
+                'pass' => true,
+            ],
+            'boolean false' => [
+                'task' => ['when' => false],
+                'pass' => false,
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $task
+     */
+    #[DataProvider('invalidWhenTypeProvider')]
+    public function testThrowsExceptionForUnsupportedWhenType(array $task): void
+    {
+        $tasks = [['fake_module' => 'something'] + $task];
+        $tasksDirective = $this->createTasksDirective($tasks);
+
+        $this->expectException(UnsupportedWhenTypeException::class);
+
+        $tasksDirective->run();
+    }
+
+    /**
+     * @return array<string, mixed[]>
+     */
+    public static function invalidWhenTypeProvider(): array
+    {
+        return [
+            'string example' => [
+                'task' => ['when' => 'foo'],
+            ],
+        ];
     }
 
     /**
