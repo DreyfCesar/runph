@@ -7,6 +7,10 @@ namespace Runph\Services\Config;
 use Runph\Services\Config\Exceptions\InvalidConfigFileException;
 use Runph\Services\Filesystem\Filesystem;
 
+/**
+ * @template TKey
+ * @template TValue
+ */
 class ConfigLoader
 {
     public function __construct(
@@ -24,7 +28,7 @@ class ConfigLoader
     }
 
     /**
-     * @return array<mixed, mixed>
+     * @return array<TKey, TValue>
      */
     public function load(string $file): array
     {
@@ -39,6 +43,7 @@ class ConfigLoader
             throw new InvalidConfigFileException($path, $config);
         }
 
+        /** @var array<TKey, TValue> */
         return $config;
     }
 }

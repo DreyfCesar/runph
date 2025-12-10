@@ -7,6 +7,7 @@ namespace Tests\Runph\Playbook\Modules\Directives;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Runph\Playbook\Contracts\ModuleInterface;
 use Runph\Playbook\Exceptions\MissingModuleException;
 use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
 use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
@@ -27,7 +28,7 @@ final class TasksDirectiveTest extends TestCase
     /** @var MockObject&ModuleRunner */
     private ModuleRunner $moduleRunner;
 
-    /** @var MockObject&ConfigLoader */
+    /** @var MockObject&ConfigLoader<string, class-string<ModuleInterface>> */
     private ConfigLoader $configLoader;
 
     public function setUp(): void

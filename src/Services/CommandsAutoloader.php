@@ -12,6 +12,9 @@ use Symfony\Component\Console\Command\Command;
 
 class CommandsAutoloader
 {
+    /**
+     * @param ConfigLoader<int, class-string<Command>> $config
+     */
     public function __construct(
         private ConfigLoader $config,
         private ContainerInterface $container,
@@ -19,7 +22,6 @@ class CommandsAutoloader
 
     public function registerCommands(Application $application): void
     {
-        /** @var string[] */
         $commands = $this->config->load('commands');
 
         foreach ($commands as $commandClassname) {
