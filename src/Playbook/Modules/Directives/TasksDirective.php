@@ -26,6 +26,7 @@ class TasksDirective implements ModuleInterface
 
     /**
      * @param array<string, mixed>[] $value
+     * @param ConfigLoader<string, class-string<ModuleInterface>> $configLoader
      */
     public function __construct(
         private array $value,
@@ -34,7 +35,6 @@ class TasksDirective implements ModuleInterface
         private ModuleRunner $moduleRunner,
         ConfigLoader $configLoader,
     ) {
-        /** @var array<string, class-string<ModuleInterface>> */
         $modules = $configLoader->load('tasks');
         $this->modules = $modules;
     }

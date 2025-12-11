@@ -9,6 +9,9 @@ use Runph\Services\Config\ConfigLoader;
 
 class PlaybookExecutor
 {
+    /**
+     * @param ConfigLoader<string, class-string<ModuleInterface>> $configLoader
+     */
     public function __construct(
         private PlaybookConverter $playbookConverter,
         private ConfigLoader $configLoader,
@@ -18,8 +21,6 @@ class PlaybookExecutor
     public function execute(string $filepath): void
     {
         $playbook = $this->playbookConverter->toArray($filepath);
-
-        /** @var array<string, class-string<ModuleInterface>> */
         $directives = $this->configLoader->load('directives');
 
         $this->moduleRunner->run($playbook, $directives);
