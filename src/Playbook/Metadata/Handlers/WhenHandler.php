@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Runph\Playbook\Metadata\Modules;
+namespace Runph\Playbook\Metadata\Handlers;
 
 use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
 use Runph\Playbook\Metadata\Register;
 
-class WhenMeta
+class WhenHandler
 {
     public function run(Register $register): void
     {

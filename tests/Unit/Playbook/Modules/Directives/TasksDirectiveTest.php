@@ -11,8 +11,8 @@ use Runph\Playbook\Contracts\ModuleInterface;
 use Runph\Playbook\Exceptions\MissingModuleException;
 use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
 use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
-use Runph\Playbook\Metadata\Modules\NameMeta;
-use Runph\Playbook\Metadata\Modules\WhenMeta;
+use Runph\Playbook\Metadata\Handlers\NameHandler;
+use Runph\Playbook\Metadata\Handlers\WhenHandler;
 use Runph\Playbook\ModuleRunner;
 use Runph\Playbook\Modules\Directives\TasksDirective;
 use Runph\Services\Config\ConfigLoader;
@@ -206,8 +206,8 @@ final class TasksDirectiveTest extends TestCase
     {
         return new TasksDirective(
             $tasks,
-            new NameMeta($this->terminal, $this->output),
-            new WhenMeta(),
+            new NameHandler($this->terminal, $this->output),
+            new WhenHandler(),
             $this->moduleRunner,
             $this->configLoader,
         );

@@ -7,8 +7,8 @@ namespace Runph\Playbook\Modules\Directives;
 use Runph\Playbook\Contracts\ModuleInterface;
 use Runph\Playbook\Exceptions\MissingModuleException;
 use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
-use Runph\Playbook\Metadata\Modules\NameMeta;
-use Runph\Playbook\Metadata\Modules\WhenMeta;
+use Runph\Playbook\Metadata\Handlers\NameHandler;
+use Runph\Playbook\Metadata\Handlers\WhenHandler;
 use Runph\Playbook\Metadata\Register;
 use Runph\Playbook\ModuleRunner;
 use Runph\Services\Config\ConfigLoader;
@@ -30,8 +30,8 @@ class TasksDirective implements ModuleInterface
      */
     public function __construct(
         private array $value,
-        private NameMeta $nameMeta,
-        private WhenMeta $whenMeta,
+        private NameHandler $nameMeta,
+        private WhenHandler $whenMeta,
         private ModuleRunner $moduleRunner,
         ConfigLoader $configLoader,
     ) {

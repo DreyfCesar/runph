@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Runph\Playbook\Metadata\Modules;
+namespace Runph\Playbook\Metadata\Handlers;
 
 use Runph\Playbook\Metadata\Register;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 
-class NameMeta
+class NameHandler
 {
     public function __construct(
         private Terminal $terminal,
