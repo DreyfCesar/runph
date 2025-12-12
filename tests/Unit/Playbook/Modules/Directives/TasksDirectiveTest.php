@@ -212,8 +212,8 @@ final class TasksDirectiveTest extends TestCase
         $configLoader->method('load')
             ->with('meta_handlers')
             ->willReturn([
-                NameHandler::class,
-                WhenHandler::class,
+                'name' => NameHandler::class,
+                'when' => WhenHandler::class,
             ]);
 
         $container->method('get')

@@ -12,14 +12,18 @@ class MetaHandler
     /** @var MetaHandlerInterface[] */
     private array $handlers;
 
+    /** @var string[] */
+    private readonly array $keywords;
+
     /**
-     * @param ConfigLoader<int, class-string<MetaHandlerInterface>> $configLoader
+     * @param ConfigLoader<string, class-string<MetaHandlerInterface>> $configLoader
      */
     public function __construct(
         ConfigLoader $configLoader,
         ContainerInterface $container,
     ) {
         $handlers = $configLoader->load('meta_handlers');
+        $this->keywords = array_keys($handlers);
 
         foreach ($handlers as $handlerClassname) {
             $instance = $container->get($handlerClassname);
@@ -35,5 +39,13 @@ class MetaHandler
         foreach ($this->handlers as $handler) {
             $handler->run($register);
         }
+    }
+
+    /**
+     * @return string[]
+     */
+    public function keywords(): array
+    {
+        return $this->keywords;
     }
 }

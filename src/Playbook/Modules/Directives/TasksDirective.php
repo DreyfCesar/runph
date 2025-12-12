@@ -14,12 +14,6 @@ use Runph\Services\Config\ConfigLoader;
 
 class TasksDirective implements ModuleInterface
 {
-    /** @var string[] */
-    public const KEYWORDS = [
-        'name',
-        'when',
-    ];
-
     /** @var array<string, class-string<ModuleInterface>> */
     private array $modules;
 
@@ -55,7 +49,7 @@ class TasksDirective implements ModuleInterface
      */
     public function executeModule(array $task, string $taskName): void
     {
-        $taskModules = array_diff_key($task, array_flip(self::KEYWORDS));
+        $taskModules = array_diff_key($task, array_flip($this->metaHandler->keywords()));
         $modulesCount = count($taskModules);
 
         if ($modulesCount < 1) {
