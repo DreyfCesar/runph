@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Runph\Playbook\Metadata\Handlers;
 
 use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
+use Runph\Playbook\Metadata\MetaHandlerInterface;
 use Runph\Playbook\Metadata\Register;
 
-class WhenHandler
+class WhenHandler implements MetaHandlerInterface
 {
     public function run(Register $register): void
     {
