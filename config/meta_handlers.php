@@ -6,6 +6,6 @@ use Runph\Playbook\Metadata\Handlers\NameHandler;
 use Runph\Playbook\Metadata\Handlers\WhenHandler;
 
 return [
-    NameHandler::class,
-    WhenHandler::class,
+    'name' => NameHandler::class,
+    'when' => WhenHandler::class,
 ];
