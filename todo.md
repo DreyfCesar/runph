@@ -4,6 +4,8 @@ A trabajar papu.
 
 ## Trabajando
 
+- [ ] Refactorizar la ejecución de tareas.
+
 ## Módulos
 
 Lista de módulos que faltan por hacer.
