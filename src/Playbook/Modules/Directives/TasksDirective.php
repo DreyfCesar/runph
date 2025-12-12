@@ -8,10 +8,10 @@ use Runph\Playbook\Contracts\ModuleInterface;
 use Runph\Playbook\Exceptions\MissingModuleException;
 use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
 use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
+use Runph\Playbook\Metadata\Modules\NameMeta;
+use Runph\Playbook\Metadata\Register;
 use Runph\Playbook\ModuleRunner;
 use Runph\Services\Config\ConfigLoader;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Terminal;
 
 class TasksDirective implements ModuleInterface
 {
@@ -30,8 +30,7 @@ class TasksDirective implements ModuleInterface
      */
     public function __construct(
         private array $value,
-        private OutputInterface $output,
-        private Terminal $terminal,
+        private NameMeta $nameMeta,
         private ModuleRunner $moduleRunner,
         ConfigLoader $configLoader,
     ) {
@@ -42,31 +41,15 @@ class TasksDirective implements ModuleInterface
     public function run(): void
     {
         foreach ($this->value as $id => $task) {
-            $taskName = $this->getAndPrintName($task, $id);
+            $register = new Register($task, $id);
+
+            $this->nameMeta->run($register);
+            $taskName = $register->name;
 
             if ($this->shouldRunTask($task)) {
                 $this->executeModule($task, $taskName);
             }
         }
-    }
-
-    /**
-     * @param array<string, mixed> $task
-     */
-    private function getAndPrintName(array $task, int $id): string
-    {
-        $name = ! empty($task['name']) && is_string($task['name'])
-            ? "[{$task['name']}]"
-            : "#{$id}";
-
-        $label = "TASK {$name}";
-        $width = $this->terminal->getWidth();
-        $stars = max(0, $width - strlen($label) - 1);
-
-        $this->output->writeln('');
-        $this->output->writeln("<info>{$label}</> " . str_repeat('*', $stars));
-
-        return $name;
     }
 
     /**
