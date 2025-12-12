@@ -7,8 +7,8 @@ namespace Runph\Playbook\Modules\Directives;
 use Runph\Playbook\Contracts\ModuleInterface;
 use Runph\Playbook\Exceptions\MissingModuleException;
 use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
-use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
 use Runph\Playbook\Metadata\Modules\NameMeta;
+use Runph\Playbook\Metadata\Modules\WhenMeta;
 use Runph\Playbook\Metadata\Register;
 use Runph\Playbook\ModuleRunner;
 use Runph\Services\Config\ConfigLoader;
@@ -31,6 +31,7 @@ class TasksDirective implements ModuleInterface
     public function __construct(
         private array $value,
         private NameMeta $nameMeta,
+        private WhenMeta $whenMeta,
         private ModuleRunner $moduleRunner,
         ConfigLoader $configLoader,
     ) {
@@ -46,7 +47,9 @@ class TasksDirective implements ModuleInterface
             $this->nameMeta->run($register);
             $taskName = $register->name;
 
-            if ($this->shouldRunTask($task)) {
+            $this->whenMeta->run($register);
+
+            if ($register->shouldRun()) {
                 $this->executeModule($task, $taskName);
             }
         }
@@ -69,23 +72,5 @@ class TasksDirective implements ModuleInterface
         }
 
         $this->moduleRunner->run($taskModules, $this->modules);
-    }
-
-    /**
-     * @param array<string, mixed> $task
-     */
-    public function shouldRunTask(array $task): bool
-    {
-        if (isset($task['when'])) {
-            $condition = $task['when'];
-
-            if (is_bool($condition)) {
-                return $condition;
-            }
-
-            throw new UnsupportedWhenTypeException(gettype($task['when']));
-        }
-
-        return true;
     }
 }

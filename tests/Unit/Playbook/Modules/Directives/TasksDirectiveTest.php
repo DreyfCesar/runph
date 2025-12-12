@@ -12,6 +12,7 @@ use Runph\Playbook\Exceptions\MissingModuleException;
 use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
 use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
 use Runph\Playbook\Metadata\Modules\NameMeta;
+use Runph\Playbook\Metadata\Modules\WhenMeta;
 use Runph\Playbook\ModuleRunner;
 use Runph\Playbook\Modules\Directives\TasksDirective;
 use Runph\Services\Config\ConfigLoader;
@@ -32,8 +33,6 @@ final class TasksDirectiveTest extends TestCase
     /** @var MockObject&ConfigLoader<string, class-string<ModuleInterface>> */
     private ConfigLoader $configLoader;
 
-    private NameMeta $nameMeta;
-
     public function setUp(): void
     {
         parent::setUp();
@@ -42,7 +41,6 @@ final class TasksDirectiveTest extends TestCase
         $this->terminal = $this->createMock(Terminal::class);
         $this->moduleRunner = $this->createMock(ModuleRunner::class);
         $this->configLoader = $this->createMock(ConfigLoader::class);
-        $this->nameMeta = new NameMeta($this->terminal, $this->output);
     }
 
     public function testThrowsExceptionWhenTaskHasMultipleModules(): void
@@ -208,7 +206,8 @@ final class TasksDirectiveTest extends TestCase
     {
         return new TasksDirective(
             $tasks,
-            $this->nameMeta,
+            new NameMeta($this->terminal, $this->output),
+            new WhenMeta(),
             $this->moduleRunner,
             $this->configLoader,
         );
