@@ -7,12 +7,14 @@ namespace Tests\Runph\Playbook\Modules\Directives;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Runph\Playbook\Contracts\ModuleInterface;
 use Runph\Playbook\Exceptions\MissingModuleException;
 use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
 use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
 use Runph\Playbook\Metadata\Handlers\NameHandler;
 use Runph\Playbook\Metadata\Handlers\WhenHandler;
+use Runph\Playbook\Metadata\MetaHandler;
 use Runph\Playbook\ModuleRunner;
 use Runph\Playbook\Modules\Directives\TasksDirective;
 use Runph\Services\Config\ConfigLoader;
@@ -204,10 +206,28 @@ final class TasksDirectiveTest extends TestCase
      */
     private function createTasksDirective(array $tasks): TasksDirective
     {
+        $configLoader = $this->createMock(ConfigLoader::class);
+        $container = $this->createMock(ContainerInterface::class);
+
+        $configLoader->method('load')
+            ->with('meta_handlers')
+            ->willReturn([
+                NameHandler::class,
+                WhenHandler::class,
+            ]);
+
+        $container->method('get')
+            ->willReturnCallback(function (string $id) {
+                return match($id) {
+                    NameHandler::class => new NameHandler($this->terminal, $this->output),
+                    WhenHandler::class => new WhenHandler(),
+                    default => null,
+                };
+            });
+
         return new TasksDirective(
             $tasks,
-            new NameHandler($this->terminal, $this->output),
-            new WhenHandler(),
+            new MetaHandler($configLoader, $container),
             $this->moduleRunner,
             $this->configLoader,
         );

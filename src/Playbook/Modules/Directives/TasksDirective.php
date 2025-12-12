@@ -7,8 +7,7 @@ namespace Runph\Playbook\Modules\Directives;
 use Runph\Playbook\Contracts\ModuleInterface;
 use Runph\Playbook\Exceptions\MissingModuleException;
 use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
-use Runph\Playbook\Metadata\Handlers\NameHandler;
-use Runph\Playbook\Metadata\Handlers\WhenHandler;
+use Runph\Playbook\Metadata\MetaHandler;
 use Runph\Playbook\Metadata\Register;
 use Runph\Playbook\ModuleRunner;
 use Runph\Services\Config\ConfigLoader;
@@ -30,8 +29,7 @@ class TasksDirective implements ModuleInterface
      */
     public function __construct(
         private array $value,
-        private NameHandler $nameMeta,
-        private WhenHandler $whenMeta,
+        private MetaHandler $metaHandler,
         private ModuleRunner $moduleRunner,
         ConfigLoader $configLoader,
     ) {
@@ -44,13 +42,10 @@ class TasksDirective implements ModuleInterface
         foreach ($this->value as $id => $task) {
             $register = new Register($task, $id);
 
-            $this->nameMeta->run($register);
-            $taskName = $register->name;
-
-            $this->whenMeta->run($register);
+            $this->metaHandler->run($register);
 
             if ($register->shouldRun()) {
-                $this->executeModule($task, $taskName);
+                $this->executeModule($task, $register->name);
             }
         }
     }
