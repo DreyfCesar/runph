@@ -9,14 +9,14 @@ use Runph\Services\Config\ConfigLoader;
 
 class MetaHandler
 {
-    /** @var MetaHandlerInterface[] */
+    /** @var HandlerInterface[] */
     private array $handlers;
 
     /** @var string[] */
     private readonly array $keywords;
 
     /**
-     * @param ConfigLoader<string, class-string<MetaHandlerInterface>> $configLoader
+     * @param ConfigLoader<string, class-string<HandlerInterface>> $configLoader
      */
     public function __construct(
         ConfigLoader $configLoader,
@@ -28,7 +28,7 @@ class MetaHandler
         foreach ($handlers as $handlerClassname) {
             $instance = $container->get($handlerClassname);
 
-            assert($instance instanceof MetaHandlerInterface);
+            assert($instance instanceof HandlerInterface);
 
             $this->handlers[] = $instance;
         }
@@ -37,7 +37,7 @@ class MetaHandler
     public function run(Register $register): void
     {
         foreach ($this->handlers as $handler) {
-            $handler->run($register);
+            $handler->handle($register);
         }
     }
 

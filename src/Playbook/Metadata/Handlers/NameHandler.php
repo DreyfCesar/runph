@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Runph\Playbook\Metadata\Handlers;
 
-use Runph\Playbook\Metadata\MetaHandlerInterface;
+use Runph\Playbook\Metadata\HandlerInterface;
 use Runph\Playbook\Metadata\Register;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 
-class NameHandler implements MetaHandlerInterface
+class NameHandler implements HandlerInterface
 {
     public function __construct(
         private Terminal $terminal,
         private OutputInterface $output,
     ) {}
 
-    public function run(Register $register): void
+    public function handle(Register $register): void
     {
         $name = $register->get('name');
 

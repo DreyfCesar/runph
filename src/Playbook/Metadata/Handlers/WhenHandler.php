@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Runph\Playbook\Metadata\Handlers;
 
 use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
-use Runph\Playbook\Metadata\MetaHandlerInterface;
+use Runph\Playbook\Metadata\HandlerInterface;
 use Runph\Playbook\Metadata\Register;
 
-class WhenHandler implements MetaHandlerInterface
+class WhenHandler implements HandlerInterface
 {
-    public function run(Register $register): void
+    public function handle(Register $register): void
     {
         $condition = $register->get('when');
 
