@@ -7,6 +7,7 @@ namespace Runph\Playbook\Metadata;
 class Register
 {
     public string $name = '';
+    public bool $shouldRun = false;
 
     /**
      * @param mixed[] $data
@@ -24,5 +25,10 @@ class Register
     public function identifier(): int|string
     {
         return $this->id;
+    }
+
+    public function shouldRun(): bool
+    {
+        return $this->shouldRun;
     }
 }
