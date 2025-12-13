@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Runph\Playbook\Metadata\Handlers;
 
+use Runph\Playbook\Contracts\TaskPresenterInterface;
 use Runph\Playbook\Metadata\HandlerInterface;
 use Runph\Playbook\Metadata\Register;
-use Runph\Playbook\Presenters\TaskPresenter;
 
 class NameHandler implements HandlerInterface
 {
     public function __construct(
-        private TaskPresenter $taskPresenter,
+        private TaskPresenterInterface $taskPresenter,
     ) {}
 
     public function handle(Register $register): void
