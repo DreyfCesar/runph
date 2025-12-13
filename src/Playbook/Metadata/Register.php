@@ -31,4 +31,17 @@ class Register
     {
         return $this->shouldRun;
     }
+
+    /**
+     * @return mixed[]
+     */
+    public function data(): array
+    {
+        return $this->data;
+    }
+
+    public function name(): string
+    {
+        return $this->name;
+    }
 }
