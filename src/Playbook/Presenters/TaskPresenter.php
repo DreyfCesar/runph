@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Runph\Playbook\Presenters;
 
+use Runph\Playbook\Contracts\TaskPresenterInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 
-class TaskPresenter
+class TaskPresenter implements TaskPresenterInterface
 {
     public function __construct(
         private Terminal $terminal,
