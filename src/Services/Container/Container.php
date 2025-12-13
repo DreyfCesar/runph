@@ -9,14 +9,18 @@ use Runph\Services\Container\Contracts\FactoryContainerInterface;
 
 class Container implements ContainerInterface, FactoryContainerInterface
 {
-    /** @var mixed[] */
+    /** @var Array<object | class-string<object>> */
     private array $services = [];
 
     public function __construct(
         private ReflectionResolver $reflectionResolver
     ) {}
 
-    public function set(string $id, mixed $value): mixed
+    /**
+     * @param class-string<object> $id
+     * @param object | class-string<object> $value
+     */
+    public function set(string $id, object|string $value): object|string
     {
         return $this->services[$id] = $value;
     }
@@ -30,13 +34,19 @@ class Container implements ContainerInterface, FactoryContainerInterface
      */
     public function get(string $id): mixed
     {
+        $service = $id;
+
         if ($this->has($id)) {
-            /** @var T */
-            return $this->services[$id];
+            if (! is_string($this->services[$id])) {
+                /** @var T */
+                return $this->services[$id];
+            }
+
+            $service = $this->services[$id];
         }
 
         /** @var T */
-        return $this->set($id, $this->reflectionResolver->get($id));
+        return $this->set($id, $this->reflectionResolver->get($service));
     }
 
     /**
