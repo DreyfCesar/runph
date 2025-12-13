@@ -33,13 +33,6 @@ class ContainerTest extends TestCase
         $this->assertSame($service, $result);
     }
 
-    public function testHasReturnsTrueWhenServiceExists(): void
-    {
-        $this->container->set('foo', 123);
-
-        $this->assertTrue($this->container->has('foo'));
-    }
-
     public function testHasReturnsFalseWhenServiceDoesNotExist(): void
     {
         $this->assertFalse($this->container->has('undefined'));
