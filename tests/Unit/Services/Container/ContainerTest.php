@@ -84,4 +84,21 @@ class ContainerTest extends TestCase
         $this->assertInstanceOf(stdClass::class, $instance2);
         $this->assertNotSame($instance1, $instance2, 'make() should return a new instance each time and not cache it');
     }
+
+    public function testSettingAlias(): void
+    {
+        $this->container->set(DummyInterface::class, Dummy::class);
+
+        $this->reflectionResolver
+            ->method('get')
+            ->with(Dummy::class)
+            ->willReturn(new Dummy());
+
+        $result = $this->container->get(DummyInterface::class);
+        $this->assertInstanceOf(Dummy::class, $result);
+    }
 }
+
+interface DummyInterface {}
+
+class Dummy implements DummyInterface {}
