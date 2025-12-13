@@ -6,14 +6,12 @@ namespace Runph\Playbook\Metadata\Handlers;
 
 use Runph\Playbook\Metadata\HandlerInterface;
 use Runph\Playbook\Metadata\Register;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Terminal;
+use Runph\Playbook\Presenters\TaskPresenter;
 
 class NameHandler implements HandlerInterface
 {
     public function __construct(
-        private Terminal $terminal,
-        private OutputInterface $output,
+        private TaskPresenter $taskPresenter,
     ) {}
 
     public function handle(Register $register): void
@@ -24,12 +22,8 @@ class NameHandler implements HandlerInterface
             $name = '#' . $register->identifier();
         }
 
-        $label = "TASK {$name}";
-        $width = $this->terminal->getWidth();
-        $stars = max(0, $width - strlen($label) - 1);
-
         $register->setName($name);
-        $this->output->writeln('');
-        $this->output->writeln("<info>{$label}</> " . str_repeat('*', $stars));
+
+        $this->taskPresenter->title($name);
     }
 }
