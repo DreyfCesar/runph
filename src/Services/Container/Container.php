@@ -34,13 +34,19 @@ class Container implements ContainerInterface, FactoryContainerInterface
      */
     public function get(string $id): mixed
     {
+        $service = $id;
+
         if ($this->has($id)) {
-            /** @var T */
-            return $this->services[$id];
+            if (! is_string($this->services[$id])) {
+                /** @var T */
+                return $this->services[$id];
+            }
+
+            $service = $this->services[$id];
         }
 
         /** @var T */
-        return $this->set($id, $this->reflectionResolver->get($id));
+        return $this->set($id, $this->reflectionResolver->get($service));
     }
 
     /**
