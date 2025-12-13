@@ -6,8 +6,8 @@ namespace Runph\Playbook\Metadata;
 
 class Register
 {
-    public string $name = '';
-    public bool $shouldRun = false;
+    private string $name = '';
+    private bool $shouldRunModule = true;
 
     /**
      * @param mixed[] $data
@@ -27,9 +27,14 @@ class Register
         return $this->id;
     }
 
-    public function shouldRun(): bool
+    public function shouldRunModule(): bool
     {
-        return $this->shouldRun;
+        return $this->shouldRunModule;
+    }
+
+    public function skipModule(): void
+    {
+        $this->shouldRunModule = false;
     }
 
     /**
@@ -43,5 +48,10 @@ class Register
     public function name(): string
     {
         return $this->name;
+    }
+
+    public function setName(string $name): string
+    {
+        return $this->name = $name;
     }
 }

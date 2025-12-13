@@ -16,13 +16,14 @@ class WhenHandler implements HandlerInterface
 
         if (! is_null($condition)) {
             if (is_bool($condition)) {
-                $register->shouldRun = $condition;
+                if (! $condition) {
+                    $register->skipModule();
+                }
+
                 return;
             }
 
             throw new UnsupportedWhenTypeException(gettype($condition));
         }
-
-        $register->shouldRun = true;
     }
 }

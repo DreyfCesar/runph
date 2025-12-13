@@ -28,7 +28,7 @@ class NameHandler implements HandlerInterface
         $width = $this->terminal->getWidth();
         $stars = max(0, $width - strlen($label) - 1);
 
-        $register->name = $name;
+        $register->setName($name);
         $this->output->writeln('');
         $this->output->writeln("<info>{$label}</> " . str_repeat('*', $stars));
     }

@@ -39,7 +39,7 @@ class ModuleHandler implements HandlerInterface
 
     public function handle(Register $register): void
     {
-        if (! $register->shouldRun()) {
+        if (! $register->shouldRunModule()) {
             return;
         }
 
