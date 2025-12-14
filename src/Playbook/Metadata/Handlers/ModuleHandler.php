@@ -39,10 +39,6 @@ class ModuleHandler implements HandlerInterface
 
     public function handle(Register $register): void
     {
-        if (! $register->shouldRunModule()) {
-            return;
-        }
-
         $taskModules = array_diff_key($register->data(), array_flip($this->keywords));
         $modulesCount = count($taskModules);
 

@@ -33,6 +33,10 @@ class MetaHandler
     public function run(Register $register): void
     {
         foreach ($this->handlers as $handler) {
+            if ($register->shouldSkip()) {
+                break;
+            }
+
             $handler->handle($register);
         }
     }

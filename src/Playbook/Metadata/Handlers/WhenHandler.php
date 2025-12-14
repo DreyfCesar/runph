@@ -12,12 +12,14 @@ class WhenHandler implements HandlerInterface
 {
     public function handle(Register $register): void
     {
+        $register->pass();
+
         $condition = $register->get('when');
 
         if (! is_null($condition)) {
             if (is_bool($condition)) {
                 if (! $condition) {
-                    $register->skipModule();
+                    $register->skip();
                 }
 
                 return;
