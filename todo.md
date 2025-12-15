@@ -5,6 +5,14 @@ A trabajar papu.
 ## Trabajando
 
 - [ ] Refactorizar la ejecución de tareas.
+  - [ ] Reemplazar `assert()` por una excepción en MetaHandler.
+  - [ ] Hacer pruebas unitarias de MetaHandler.
+    - [ ] Probar que funciona como se espera.
+    - [ ] Probar que se ejecutan los handlers en el orden esperado.
+    - [ ] Probar los múltiples casos de `shouldSkip()`.
+  - [ ] Hacer pruebas unitarias de Register.
+  - [ ] Hacer pruebas unitarias de RegisterFactory (¿innecesario?).
+  - [ ] Corregir las pruebas fallidas de TasksDirectiveTest por los cambios realizados.
 
 ## Módulos
 
