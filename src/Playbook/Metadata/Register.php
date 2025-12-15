@@ -17,6 +17,11 @@ class Register
         private int|string $id,
     ) {}
 
+    public function has(string $address): bool
+    {
+        return isset($this->data[$address]);
+    }
+
     public function get(string $address): mixed
     {
         return $this->data[$address] ?? null;
