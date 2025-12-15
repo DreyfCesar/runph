@@ -25,6 +25,11 @@ class WhenHandlerTest extends TestCase
             ->method('pass');
 
         $register->expects($this->once())
+            ->method('has')
+            ->with('when')
+            ->willReturn(true);
+
+        $register->expects($this->once())
             ->method('get')
             ->with('when')
             ->willReturn($value);
@@ -49,6 +54,11 @@ class WhenHandlerTest extends TestCase
             ->id('pass');
 
         $register->expects($this->once())
+            ->method('has')
+            ->with('when')
+            ->willReturn(true);
+
+        $register->expects($this->once())
             ->method('get')
             ->with('when')
             ->willReturn($value);
@@ -56,6 +66,25 @@ class WhenHandlerTest extends TestCase
         $register->expects($this->once())
             ->method('skip')
             ->after('pass');
+
+        $handler->handle($register);
+    }
+
+    public function testHandleCallsPassWhenWhenIsMissing(): void
+    {
+        $register = $this->createMock(Register::class);
+        $handler = new WhenHandler();
+
+        $register->expects($this->once())
+            ->method('pass');
+
+        $register->expects($this->once())
+            ->method('has')
+            ->with('when')
+            ->willReturn(false);
+
+        $register->expects($this->never())
+            ->method('skip');
 
         $handler->handle($register);
     }
@@ -68,6 +97,11 @@ class WhenHandlerTest extends TestCase
     {
         $register = $this->createMock(Register::class);
         $handler = new WhenHandler();
+
+        $register->expects($this->once())
+            ->method('has')
+            ->with('when')
+            ->willReturn(true);
 
         $register->expects($this->once())
             ->method('get')

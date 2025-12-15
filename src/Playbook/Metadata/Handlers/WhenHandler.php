@@ -14,6 +14,10 @@ class WhenHandler implements HandlerInterface
     {
         $register->pass();
 
+        if (! $register->has('when')) {
+            return;
+        }
+
         $condition = $register->get('when');
 
         if (! is_null($condition)) {
