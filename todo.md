@@ -12,7 +12,7 @@ A trabajar papu.
     - [x] Probar los múltiples casos de `shouldSkip()`.
   - [ ] Hacer pruebas unitarias de Register.
   - [ ] Hacer pruebas unitarias de RegisterFactory (¿innecesario?).
-  - [ ] Corregir las pruebas fallidas de TasksDirectiveTest por los cambios realizados.
+  - [x] Corregir las pruebas fallidas de TasksDirectiveTest por los cambios realizados.
 
 ## Módulos
 
