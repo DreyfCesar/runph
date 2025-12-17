@@ -56,3 +56,10 @@ Directivas del playbook por implementar.
 ## Sistemas
 
 - [ ] Evaluación de valores. Un sistema que se encargue de evaluar tal y como lo hace Jinja, pero más simple...
+
+### Eventos
+
+- [ ] Agregar modo debug.
+  - [ ] Mostrar eventos que se disparan.
+  - [ ] Mostrar listeners ejecutados.
+  - [ ] Detectar propagación detenida.
