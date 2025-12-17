@@ -34,17 +34,25 @@ $container->set(OutputInterface::class, new ConsoleOutput());
 
 $listenerProvider = new SimpleListenerProvider($container);
 $eventDispatcher = new SimpleEventDispatcher($listenerProvider);
+$configLoader = new ConfigLoader($container->get(Filesystem::class), dirname(__DIR__) . '/config');
 
 $container->set(ListenerProviderInterface::class, $listenerProvider);
 $container->set(EventDispatcherInterface::class, $eventDispatcher);
+$container->set(ConfigLoader::class, $configLoader);
 
-$container->set(
-    ConfigLoader::class,
-    new ConfigLoader(
-        $container->get(Filesystem::class),
-        dirname(__DIR__) . '/config'
-    )
-);
+/** @var array<class-string<object>, string|list<class-string<object>>> */
+$listenerList = $configLoader->load('listeners');
+
+foreach ($listenerList as $eventClass => $listeners) {
+    if (is_string($listeners)) {
+        $listeners = [$listeners];
+    }
+
+    foreach ($listeners as $listener) {
+        /** @var class-string<object> $listener */
+        $listenerProvider->addListener($eventClass, $listener);
+    }
+}
 
 $application = new Application('Runph', '[dev]');
 
