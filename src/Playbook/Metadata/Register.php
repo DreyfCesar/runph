@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Runph\Playbook\Metadata;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Runph\Playbook\Metadata\Events\TaskNameChanged;
+
 class Register
 {
     private string $name = '';
@@ -15,6 +18,7 @@ class Register
     public function __construct(
         private array $data,
         private int|string $id,
+        private EventDispatcherInterface $eventDispatcher,
     ) {}
 
     public function has(string $address): bool
@@ -62,6 +66,8 @@ class Register
 
     public function setName(string $name): string
     {
+        $this->eventDispatcher->dispatch(new TaskNameChanged($name));
+
         return $this->name = $name;
     }
 }

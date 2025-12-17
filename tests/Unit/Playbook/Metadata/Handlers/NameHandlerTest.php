@@ -6,16 +6,12 @@ namespace Tests\Unit\Playbook\Metadata\Handlers;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Runph\Playbook\Contracts\TaskPresenterInterface;
 use Runph\Playbook\Exceptions\InvalidRegisterValueException;
 use Runph\Playbook\Metadata\Handlers\NameHandler;
 use Runph\Playbook\Metadata\Register;
 
 class NameHandlerTest extends TestCase
 {
-    /** @var MockObject&TaskPresenterInterface */
-    private TaskPresenterInterface $presenter;
-
     /** @var MockObject&Register */
     private Register $register;
 
@@ -23,9 +19,8 @@ class NameHandlerTest extends TestCase
 
     public function setUp(): void
     {
-        $this->presenter = $this->createMock(TaskPresenterInterface::class);
         $this->register = $this->createMock(Register::class);
-        $this->nameHandler = new NameHandler($this->presenter);
+        $this->nameHandler = new NameHandler();
     }
 
     public function testHandleStoresProvidedNameAndSetsPresenterTitle(): void
@@ -46,11 +41,6 @@ class NameHandlerTest extends TestCase
         $this->register
             ->expects($this->never())
             ->method('identifier');
-
-        $this->presenter
-            ->expects($this->once())
-            ->method('title')
-            ->with($name);
 
         $this->nameHandler->handle($this->register);
     }
@@ -74,11 +64,6 @@ class NameHandlerTest extends TestCase
         $this->register
             ->expects($this->once())
             ->method('setName')
-            ->with($expectedName);
-
-        $this->presenter
-            ->expects($this->once())
-            ->method('title')
             ->with($expectedName);
 
         $this->nameHandler->handle($this->register);
