@@ -4,6 +4,10 @@
 declare(strict_types=1);
 
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\EventDispatcher\ListenerProviderInterface;
+use Runph\Events\Dispatcher\SimpleEventDispatcher;
+use Runph\Events\Dispatcher\SimpleListenerProvider;
 use Runph\Services\CommandsAutoloader;
 use Runph\Services\Config\ConfigLoader;
 use Runph\Services\Container\Container;
@@ -27,6 +31,12 @@ $container->set(ContainerInterface::class, $container);
 $container->set(FactoryContainerInterface::class, $container);
 $container->set(InputInterface::class, new ArgvInput());
 $container->set(OutputInterface::class, new ConsoleOutput());
+
+$listenerProvider = new SimpleListenerProvider($container);
+$eventDispatcher = new SimpleEventDispatcher($listenerProvider);
+
+$container->set(ListenerProviderInterface::class, $listenerProvider);
+$container->set(EventDispatcherInterface::class, $eventDispatcher);
 
 $container->set(
     ConfigLoader::class,
