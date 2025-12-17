@@ -4,12 +4,6 @@ A trabajar papu.
 
 ## Trabajando
 
-- [ ] Crear un sistema de eventos.
-  - [x] Instalar `psr/event-dispatcher`.
-  - [x] Crear una implementación para el dispatcher.
-  - [x] Incluir el dispatcher al container.
-  - [x] Crear un archivo de configuración para listar los eventos y sus listener.
-
 ## Módulos
 
 Lista de módulos que faltan por hacer.
