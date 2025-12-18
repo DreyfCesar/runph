@@ -10,7 +10,7 @@ A trabajar papu.
     - [x] Probar que funciona como se espera.
     - [x] Probar que se ejecutan los handlers en el orden esperado.
     - [x] Probar los múltiples casos de `shouldSkip()`.
-  - [ ] Hacer pruebas unitarias de Register.
+  - [x] Hacer pruebas unitarias de Register.
   - [ ] Hacer pruebas unitarias de RegisterFactory (¿innecesario?).
   - [x] Corregir las pruebas fallidas de TasksDirectiveTest por los cambios realizados.
 
