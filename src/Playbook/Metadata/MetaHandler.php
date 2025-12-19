@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Runph\Playbook\Metadata;
 
 use Psr\Container\ContainerInterface;
+use Runph\Playbook\Exceptions\InvalidHandlerException;
 use Runph\Services\Config\ConfigLoader;
 
 class MetaHandler
@@ -24,7 +25,12 @@ class MetaHandler
         foreach ($handlers as $handlerClassname) {
             $instance = $container->get($handlerClassname);
 
-            assert($instance instanceof HandlerInterface);
+            if (! $instance instanceof HandlerInterface) {
+                $interface = HandlerInterface::class;
+                $givenType = gettype($instance);
+
+                throw new InvalidHandlerException("Handler must implement {$interface}, given {$givenType}.");
+            }
 
             $this->handlers[] = $instance;
         }

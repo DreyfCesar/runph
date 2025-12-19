@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Playbook\Metadata;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Runph\Playbook\Exceptions\InvalidHandlerException;
 use Runph\Playbook\Metadata\HandlerInterface;
 use Runph\Playbook\Metadata\MetaHandler;
 use Runph\Playbook\Metadata\Register;
 use Runph\Services\Config\ConfigLoader;
+use stdClass;
 
 class MetaHandlerTest extends TestCase
 {
@@ -149,6 +152,39 @@ class MetaHandlerTest extends TestCase
             ->method('handle');
 
         $this->createMetaHandler()->run($register);
+    }
+
+    #[DataProvider('nonHandlerValuesProvider')]
+    public function testMetaHandlerThrowsExceptionWhenContainerReturnsNonHandler(mixed $nonHandlerValue): void
+    {
+        // @phpstan-ignore-next-line
+        $this->mockConfigLoader(['SomeHandlerClass']);
+
+        $this->container
+            ->method('get')
+            ->with('SomeHandlerClass')
+            ->willReturn($nonHandlerValue);
+
+        $this->expectException(InvalidHandlerException::class);
+        $this->createMetaHandler();
+    }
+
+    /**
+     * @return mixed[][]
+     */
+    public static function nonHandlerValuesProvider(): array
+    {
+        return [
+            'stdClass object' => [new stdClass()],
+            'plain object' => [new class () {}],
+            'string' => ['not a handler'],
+            'integer' => [42],
+            'float' => [3.14],
+            'boolean' => [true],
+            'array' => [['data']],
+            'null' => [null],
+            'callable' => [fn () => 'callable'],
+        ];
     }
 
     /**
