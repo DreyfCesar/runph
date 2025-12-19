@@ -2,212 +2,239 @@
 
 declare(strict_types=1);
 
-namespace Tests\Runph\Playbook\Modules\Directives;
+namespace Tests\Unit\Playbook\Modules\Directives;
 
-use PHPUnit\Framework\Attributes\DataProvider;
+use LogicException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Runph\Playbook\Contracts\ModuleInterface;
-use Runph\Playbook\Exceptions\MissingModuleException;
-use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
-use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
-use Runph\Playbook\ModuleRunner;
+use Runph\Playbook\Metadata\MetaHandler;
+use Runph\Playbook\Metadata\Register;
+use Runph\Playbook\Metadata\RegisterFactory;
 use Runph\Playbook\Modules\Directives\TasksDirective;
-use Runph\Services\Config\ConfigLoader;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Terminal;
 
-final class TasksDirectiveTest extends TestCase
+class TasksDirectiveTest extends TestCase
 {
-    /** @var MockObject&OutputInterface */
-    private OutputInterface $output;
+    /** @var MockObject&MetaHandler */
+    private MetaHandler $metaHandler;
 
-    /** @var MockObject&Terminal */
-    private Terminal $terminal;
+    /** @var MockObject&RegisterFactory */
+    private RegisterFactory $registerFactory;
 
-    /** @var MockObject&ModuleRunner */
-    private ModuleRunner $moduleRunner;
-
-    /** @var MockObject&ConfigLoader<string, class-string<ModuleInterface>> */
-    private ConfigLoader $configLoader;
-
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
-        $this->output = $this->createMock(OutputInterface::class);
-        $this->terminal = $this->createMock(Terminal::class);
-        $this->moduleRunner = $this->createMock(ModuleRunner::class);
-        $this->configLoader = $this->createMock(ConfigLoader::class);
+        $this->metaHandler = $this->createMock(MetaHandler::class);
+        $this->registerFactory = $this->createMock(RegisterFactory::class);
     }
 
-    public function testThrowsExceptionWhenTaskHasMultipleModules(): void
+    public function testRunProcessesAllTasksInOrder(): void
     {
         $tasks = [
-            ['module_1' => [], 'module_2' => []],
+            'task_1' => ['name' => 'First Task', 'command' => 'echo "first"'],
+            'task_2' => ['name' => 'Second Task', 'command' => 'echo "second"'],
+            'task_3' => ['name' => 'Third Task', 'command' => 'echo "third"'],
         ];
 
-        $this->expectException(MultipleModuleInTaskException::class);
+        $register1 = $this->createMock(Register::class);
+        $register2 = $this->createMock(Register::class);
+        $register3 = $this->createMock(Register::class);
 
-        $tasksDirective = $this->createTasksDirective($tasks);
-        $tasksDirective->run();
-    }
+        $factoryCallCount = 0;
 
-    public function testThrowsExceptionWhenTaskIsMissingModule(): void
-    {
-        $tasks = [
-            [],
-        ];
+        $this->registerFactory->expects($this->exactly(3))
+            ->method('make')
+            ->willReturnCallback(function (array $task, string|int $id) use ($tasks, $register1, $register2, $register3, &$factoryCallCount): Register {
+                /** @var array<string, mixed> $task */
 
-        $this->expectException(MissingModuleException::class);
+                $factoryCallCount++;
 
-        $tasksDirective = $this->createTasksDirective($tasks);
-        $tasksDirective->run();
-    }
+                match ($factoryCallCount) {
+                    1 => $this->assertTaskData($tasks['task_1'], 'task_1', $task, $id, $register1),
+                    2 => $this->assertTaskData($tasks['task_2'], 'task_2', $task, $id, $register2),
+                    3 => $this->assertTaskData($tasks['task_3'], 'task_3', $task, $id, $register3),
+                    default => throw new LogicException('Unexpected call count'),
+                };
 
-    public function testCallsModuleRunnerToExecuteTheModules(): void
-    {
-        $taskPayload = [];
-        $enabledModules = [];
+                return match ($factoryCallCount) {
+                    1 => $register1,
+                    2 => $register2,
+                    3 => $register3,
+                    default => throw new LogicException('Unexpected call count'),
+                };
+            });
 
-        $tasks = [
-            ['module_1' => 'value to the the module'],
-            ['module_2' => [true]],
-        ];
+        $handlerCallCount = 0;
 
-        $this->configLoader
-            ->method('load')
-            ->with('tasks')
-            ->willReturn($enabledModules);
-
-        $this->moduleRunner
-            ->expects($this->any())
+        $this->metaHandler->expects($this->exactly(3))
             ->method('run')
-            ->willReturnCallback(function ($taskModule, $moduleList) use (&$taskPayload, $enabledModules) {
-                $taskPayload[] = $taskModule;
-                $this->assertSame($enabledModules, $moduleList);
+            ->willReturnCallback(function (Register $register) use ($register1, $register2, $register3, &$handlerCallCount): void {
+                $handlerCallCount++;
+
+                $expected = match ($handlerCallCount) {
+                    1 => $register1,
+                    2 => $register2,
+                    3 => $register3,
+                    default => throw new \LogicException('Unexpected call count'),
+                };
+
+                $this->assertSame($expected, $register);
             });
 
-        $tasksDirective = $this->createTasksDirective($tasks);
-        $tasksDirective->run();
-
-        $this->assertSame($tasks, $taskPayload);
+        $directive = new TasksDirective($tasks, $this->metaHandler, $this->registerFactory);
+        $directive->run();
     }
 
-    public function testPrintNameOrIdentifierOfTask(): void
+    public function testRunWithEmptyTasksArray(): void
     {
-        $tasks = [
-            ['name' => 'First task'],
-            ['name' => 'Second task'],
-            ['name' => 'áéíóúñÁÉÍÓÚÑ'],
+        $tasks = [];
 
-            [],
-            [],
-        ];
+        $this->registerFactory->expects($this->never())
+            ->method('make');
 
-        $expectedNames = [
-            'First task',
-            'Second task',
-            'áéíóúñÁÉÍÓÚÑ',
-
-            '#3',
-            '#4',
-        ];
-
-        $tasks = array_map(fn ($task) => array_merge($task, ['fake_module' => true]), $tasks);
-        $tasksDirective = $this->createTasksDirective($tasks);
-        $bufferedOutput = '';
-
-        $this->output
-            ->expects($this->any())
-            ->method('writeln')
-            ->willReturnCallback(function (string $line) use (&$bufferedOutput) {
-                $bufferedOutput .= "{$line}\n";
-            });
-
-        $tasksDirective->run();
-
-        foreach ($expectedNames as $name) {
-            $this->assertStringContainsString($name, $bufferedOutput);
-        }
-
-    }
-
-    /**
-     * @param array<string, mixed> $task
-     */
-    #[DataProvider('whenConditionalProvider')]
-    public function testModuleRunsBasedOnWhenCondition(array $task, bool $pass): void
-    {
-        $tasks = [['fake_module' => 'something'] + $task];
-
-        $this->moduleRunner
-            ->expects($pass ? $this->once() : $this->never())
+        $this->metaHandler->expects($this->never())
             ->method('run');
 
-        $tasksDirective = $this->createTasksDirective($tasks);
-
-        $tasksDirective->run();
+        $directive = new TasksDirective($tasks, $this->metaHandler, $this->registerFactory);
+        $directive->run();
     }
 
-    /**
-     * @return array<string, mixed[]>
-     */
-    public static function whenConditionalProvider(): array
+    public function testRunWithSingleTask(): void
     {
-        return [
-            'no when condition' => [
-                'task' => [],
-                'pass' => true,
-            ],
-            'boolean true' => [
-                'task' => ['when' => true],
-                'pass' => true,
-            ],
-            'boolean false' => [
-                'task' => ['when' => false],
-                'pass' => false,
+        $tasks = [
+            'single_task' => ['name' => 'Only Task', 'command' => 'ls'],
+        ];
+
+        $register = $this->createMock(Register::class);
+
+        $this->registerFactory->expects($this->once())
+            ->method('make')
+            ->with($tasks['single_task'], 'single_task')
+            ->willReturn($register);
+
+        $this->metaHandler->expects($this->once())
+            ->method('run')
+            ->with($register);
+
+        $directive = new TasksDirective($tasks, $this->metaHandler, $this->registerFactory);
+        $directive->run();
+    }
+
+    public function testRunPreservesTaskArrayKeys(): void
+    {
+        $tasks = [
+            'install' => ['command' => 'npm install'],
+            'build' => ['command' => 'npm build'],
+            'deploy' => ['command' => 'npm deploy'],
+        ];
+
+        $expectedKeys = ['install', 'build', 'deploy'];
+        /** @var array<int|string> $actualKeys */
+        $actualKeys = [];
+
+        $this->registerFactory->expects($this->exactly(3))
+            ->method('make')
+            ->willReturnCallback(function (array $task, string|int $id) use (&$actualKeys): Register {
+                $actualKeys[] = $id;
+                return $this->createMock(Register::class);
+            });
+
+        $this->metaHandler->expects($this->exactly(3))
+            ->method('run');
+
+        $directive = new TasksDirective($tasks, $this->metaHandler, $this->registerFactory);
+        $directive->run();
+
+        $this->assertSame($expectedKeys, $actualKeys);
+    }
+
+    public function testRunWithNumericKeys(): void
+    {
+        $tasks = [
+            0 => ['name' => 'Task Zero'],
+            1 => ['name' => 'Task One'],
+            2 => ['name' => 'Task Two'],
+        ];
+
+        /** @var array<int|string> $capturedIds */
+        $capturedIds = [];
+
+        $this->registerFactory->expects($this->exactly(3))
+            ->method('make')
+            ->willReturnCallback(function (array $task, string|int $id) use (&$capturedIds): Register {
+                $capturedIds[] = $id;
+                return $this->createMock(Register::class);
+            });
+
+        $this->metaHandler->expects($this->exactly(3))
+            ->method('run');
+
+        $directive = new TasksDirective($tasks, $this->metaHandler, $this->registerFactory);
+        $directive->run();
+
+        $this->assertSame([0, 1, 2], $capturedIds);
+    }
+
+    public function testRunWithComplexTaskData(): void
+    {
+        $tasks = [
+            'complex_task' => [
+                'name' => 'Complex Task',
+                'command' => 'echo "test"',
+                'when' => true,
+                'tags' => ['deployment', 'production'],
+                'vars' => ['env' => 'prod'],
+                'retry' => 3,
             ],
         ];
+
+        $register = $this->createMock(Register::class);
+
+        $this->registerFactory->expects($this->once())
+            ->method('make')
+            ->with(
+                $this->identicalTo($tasks['complex_task']),
+                'complex_task'
+            )
+            ->willReturn($register);
+
+        $this->metaHandler->expects($this->once())
+            ->method('run')
+            ->with($register);
+
+        $directive = new TasksDirective($tasks, $this->metaHandler, $this->registerFactory);
+        $directive->run();
     }
 
-    /**
-     * @param array<string, mixed> $task
-     */
-    #[DataProvider('invalidWhenTypeProvider')]
-    public function testThrowsExceptionForUnsupportedWhenType(array $task): void
+    public function testRunContinuesProcessingEvenIfMetaHandlerDoesNotThrow(): void
     {
-        $tasks = [['fake_module' => 'something'] + $task];
-        $tasksDirective = $this->createTasksDirective($tasks);
-
-        $this->expectException(UnsupportedWhenTypeException::class);
-
-        $tasksDirective->run();
-    }
-
-    /**
-     * @return array<string, mixed[]>
-     */
-    public static function invalidWhenTypeProvider(): array
-    {
-        return [
-            'string example' => [
-                'task' => ['when' => 'foo'],
-            ],
+        $tasks = [
+            'task_1' => ['command' => 'first'],
+            'task_2' => ['command' => 'second'],
+            'task_3' => ['command' => 'third'],
         ];
+
+        $this->registerFactory->expects($this->exactly(3))
+            ->method('make')
+            ->willReturn($this->createMock(Register::class));
+
+        $this->metaHandler->expects($this->exactly(3))
+            ->method('run');
+
+        $directive = new TasksDirective($tasks, $this->metaHandler, $this->registerFactory);
+        $directive->run();
+
+        $this->addToAssertionCount(1);
     }
 
     /**
-     * @param array<string, mixed>[] $tasks
+     * @param array<string, mixed> $expected
+     * @param array<string, mixed> $actual
      */
-    private function createTasksDirective(array $tasks): TasksDirective
+    private function assertTaskData(array $expected, string $expectedId, array $actual, string|int $actualId, Register $returnRegister): Register
     {
-        return new TasksDirective(
-            $tasks,
-            $this->output,
-            $this->terminal,
-            $this->moduleRunner,
-            $this->configLoader,
-        );
+        $this->assertSame($expected, $actual);
+        $this->assertSame($expectedId, $actualId);
+        return $returnRegister;
     }
 }

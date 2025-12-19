@@ -5,104 +5,26 @@ declare(strict_types=1);
 namespace Runph\Playbook\Modules\Directives;
 
 use Runph\Playbook\Contracts\ModuleInterface;
-use Runph\Playbook\Exceptions\MissingModuleException;
-use Runph\Playbook\Exceptions\MultipleModuleInTaskException;
-use Runph\Playbook\Exceptions\UnsupportedWhenTypeException;
-use Runph\Playbook\ModuleRunner;
-use Runph\Services\Config\ConfigLoader;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Terminal;
+use Runph\Playbook\Metadata\MetaHandler;
+use Runph\Playbook\Metadata\RegisterFactory;
 
 class TasksDirective implements ModuleInterface
 {
-    /** @var string[] */
-    public const KEYWORDS = [
-        'name',
-        'when',
-    ];
-
-    /** @var array<string, class-string<ModuleInterface>> */
-    private array $modules;
-
     /**
-     * @param array<string, mixed>[] $value
-     * @param ConfigLoader<string, class-string<ModuleInterface>> $configLoader
+     * @param array<string, mixed>[] $value Tasks
      */
     public function __construct(
         private array $value,
-        private OutputInterface $output,
-        private Terminal $terminal,
-        private ModuleRunner $moduleRunner,
-        ConfigLoader $configLoader,
-    ) {
-        $modules = $configLoader->load('tasks');
-        $this->modules = $modules;
-    }
+        private MetaHandler $metaHandler,
+        private RegisterFactory $registerFactory,
+    ) {}
 
     public function run(): void
     {
         foreach ($this->value as $id => $task) {
-            $taskName = $this->getAndPrintName($task, $id);
+            $register = $this->registerFactory->make($task, $id);
 
-            if ($this->shouldRunTask($task)) {
-                $this->executeModule($task, $taskName);
-            }
+            $this->metaHandler->run($register);
         }
-    }
-
-    /**
-     * @param array<string, mixed> $task
-     */
-    private function getAndPrintName(array $task, int $id): string
-    {
-        $name = ! empty($task['name']) && is_string($task['name'])
-            ? "[{$task['name']}]"
-            : "#{$id}";
-
-        $label = "TASK {$name}";
-        $width = $this->terminal->getWidth();
-        $stars = max(0, $width - strlen($label) - 1);
-
-        $this->output->writeln('');
-        $this->output->writeln("<info>{$label}</> " . str_repeat('*', $stars));
-
-        return $name;
-    }
-
-    /**
-     * @param array<string, mixed> $task
-     */
-    public function executeModule(array $task, string $taskName): void
-    {
-        $taskModules = array_diff_key($task, array_flip(self::KEYWORDS));
-        $modulesCount = count($taskModules);
-
-        if ($modulesCount < 1) {
-            throw new MissingModuleException($taskName);
-        }
-
-        if ($modulesCount > 1) {
-            throw new MultipleModuleInTaskException($taskName);
-        }
-
-        $this->moduleRunner->run($taskModules, $this->modules);
-    }
-
-    /**
-     * @param array<string, mixed> $task
-     */
-    public function shouldRunTask(array $task): bool
-    {
-        if (isset($task['when'])) {
-            $condition = $task['when'];
-
-            if (is_bool($condition)) {
-                return $condition;
-            }
-
-            throw new UnsupportedWhenTypeException(gettype($task['when']));
-        }
-
-        return true;
     }
 }
