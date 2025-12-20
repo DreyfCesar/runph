@@ -14,6 +14,10 @@ use Runph\System\SystemInterface;
 
 class EventSystem implements SystemInterface
 {
+    public function __construct(
+        private string $listenersConfigFile,
+    ) {}
+
     public function execute(Container $container): void
     {
         $listenerProvider = new SimpleListenerProvider($container);
@@ -24,7 +28,7 @@ class EventSystem implements SystemInterface
         $container->set(EventDispatcherInterface::class, $eventDispatcher);
 
         /** @var array<class-string<object>, string|list<class-string<object>>> */
-        $listenerList = $configLoader->load('listeners');
+        $listenerList = $configLoader->load($this->listenersConfigFile);
 
         foreach ($listenerList as $eventClass => $listeners) {
             if (is_string($listeners)) {

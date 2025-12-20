@@ -19,13 +19,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ServiceSystem implements SystemInterface
 {
+    public function __construct(
+        private string $configPath,
+    ) {}
+
     public function execute(Container $container): void
     {
         $container->set(ContainerInterface::class, $container);
         $container->set(FactoryContainerInterface::class, $container);
         $container->set(InputInterface::class, new ArgvInput());
         $container->set(OutputInterface::class, new ConsoleOutput());
-        $container->set(ConfigLoader::class, new ConfigLoader($container->get(Filesystem::class), dirname(dirname(dirname(__DIR__))) . '/config'));
+        $container->set(ConfigLoader::class, new ConfigLoader($container->get(Filesystem::class), $this->configPath));
 
         $container->set(TaskPresenterInterface::class, TaskPresenter::class);
     }

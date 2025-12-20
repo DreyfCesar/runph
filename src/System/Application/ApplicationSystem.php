@@ -13,9 +13,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ApplicationSystem implements SystemInterface
 {
+    public function __construct(
+        private string $name,
+        private string $version,
+    ) {}
+
     public function execute(Container $container): void
     {
-        $application = new Application('Runph', '[dev]');
+        $application = new Application($this->name, $this->version);
 
         $commandsAutoloader = $container->get(CommandsAutoloader::class);
         $commandsAutoloader->registerCommands($application);

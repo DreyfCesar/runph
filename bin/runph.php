@@ -19,7 +19,14 @@ $systems = new SystemManager($container);
 $reflection->setContainer($container);
 
 $systems->run([
-    new ServiceSystem(),
-    new EventSystem(),
-    new ApplicationSystem(),
+    new ServiceSystem(
+        configPath: dirname(__DIR__) . '/config',
+    ),
+    new EventSystem(
+        listenersConfigFile: 'listeners',
+    ),
+    new ApplicationSystem(
+        name: 'Runph',
+        version: '[dev]',
+    ),
 ]);
