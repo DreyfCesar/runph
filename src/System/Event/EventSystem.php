@@ -9,7 +9,7 @@ use Psr\EventDispatcher\ListenerProviderInterface;
 use Runph\Events\Dispatcher\SimpleEventDispatcher;
 use Runph\Events\Dispatcher\SimpleListenerProvider;
 use Runph\Services\Config\ConfigLoader;
-use Runph\Services\Container\Container;
+use Runph\System\SystemData;
 use Runph\System\SystemInterface;
 
 class EventSystem implements SystemInterface
@@ -18,8 +18,9 @@ class EventSystem implements SystemInterface
         private string $listenersConfigFile,
     ) {}
 
-    public function execute(Container $container): void
+    public function execute(SystemData $data): void
     {
+        $container = $data->container();
         $listenerProvider = new SimpleListenerProvider($container);
         $eventDispatcher = new SimpleEventDispatcher($listenerProvider);
         $configLoader = $container->get(ConfigLoader::class);

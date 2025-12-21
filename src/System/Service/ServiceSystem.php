@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Runph\System\Service;
 
-use Runph\Services\Container\Container;
 use Runph\System\Service\Providers\ConfigServiceProvider;
 use Runph\System\Service\Providers\ConsoleServiceProvider;
 use Runph\System\Service\Providers\ContainerServiceProvider;
 use Runph\System\Service\Providers\ServiceProvider;
+use Runph\System\SystemData;
 use Runph\System\SystemInterface;
 
 class ServiceSystem implements SystemInterface
@@ -26,10 +26,10 @@ class ServiceSystem implements SystemInterface
         ];
     }
 
-    public function execute(Container $container): void
+    public function execute(SystemData $data): void
     {
         foreach ($this->providers as $provider) {
-            $provider->register($container);
+            $provider->register($data->container());
         }
     }
 }

@@ -9,14 +9,16 @@ use Runph\Services\Container\ReflectionResolver;
 
 class SystemManager
 {
-    private Container $container;
+    private SystemData $data;
 
     public function __construct()
     {
         $reflection = new ReflectionResolver();
-        $this->container = new Container($reflection);
+        $container = new Container($reflection);
 
-        $reflection->setContainer($this->container);
+        $reflection->setContainer($container);
+
+        $this->data = new SystemData($container);
     }
 
     /**
@@ -25,7 +27,7 @@ class SystemManager
     public function run(array $systems): void
     {
         foreach ($systems as $system) {
-            $system->execute($this->container);
+            $system->execute($this->data);
         }
     }
 }
