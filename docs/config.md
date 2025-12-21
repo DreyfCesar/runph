@@ -8,4 +8,5 @@ La carpeta `config/` almacena los archivos de configuración que emplean algunos
 - `directives`: declara los gestores encargados de operar las directivas de un playbook asociados a una keyword
 - `listeners`: declara los listeners asociados a los eventos que registrados
 - `meta_handlers`: declara los gestores para los metadatos de una task
+- `services`: declara los proveedores de servicios para el container
 - `tasks`: declara los gestores de las tareas asociados a su respectiva keyword
