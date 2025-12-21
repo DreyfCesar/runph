@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Runph\System\Application;
 
 use Runph\Services\CommandsAutoloader;
-use Runph\Services\Container\Container;
+use Runph\System\SystemData;
 use Runph\System\SystemInterface;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,8 +18,9 @@ class ApplicationSystem implements SystemInterface
         private string $version,
     ) {}
 
-    public function execute(Container $container): void
+    public function execute(SystemData $data): void
     {
+        $container = $data->container();
         $application = new Application($this->name, $this->version);
 
         $commandsAutoloader = $container->get(CommandsAutoloader::class);
