@@ -9,7 +9,7 @@ use Runph\Playbook\Presenters\TaskPresenter;
 use Runph\Services\Container\Container;
 use Runph\System\Service\ServiceProviderInterface;
 
-class PlaybookServiceProvider implements ServiceProviderInterface
+class ServiceProvider implements ServiceProviderInterface
 {
     public function register(Container $container): void
     {
