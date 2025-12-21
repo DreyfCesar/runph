@@ -8,7 +8,7 @@ use Runph\Services\Container\Container;
 use Runph\System\Service\Providers\ConfigServiceProvider;
 use Runph\System\Service\Providers\ConsoleServiceProvider;
 use Runph\System\Service\Providers\ContainerServiceProvider;
-use Runph\System\Service\Providers\PlaybookServiceProvider;
+use Runph\System\Service\Providers\ServiceProvider;
 use Runph\System\SystemInterface;
 
 class ServiceSystem implements SystemInterface
@@ -22,7 +22,7 @@ class ServiceSystem implements SystemInterface
             new ContainerServiceProvider(),
             new ConsoleServiceProvider(),
             new ConfigServiceProvider($configPath),
-            new PlaybookServiceProvider(),
+            new ServiceProvider(),
         ];
     }
 
