@@ -21,10 +21,13 @@ class ApplicationSystem implements SystemInterface
     public function execute(SystemData $data): void
     {
         $container = $data->container();
-        $application = new Application($this->name, $this->version);
-
         $commandsAutoloader = $container->get(CommandsAutoloader::class);
+
+        $application = new Application($this->name, $this->version);
+        $serviceProvider = new ApplicationServiceProvider($application);
+
         $commandsAutoloader->registerCommands($application);
+        $serviceProvider->register($container);
 
         $application->run(
             input: $container->get(InputInterface::class),
