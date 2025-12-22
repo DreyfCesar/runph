@@ -4,6 +4,11 @@ A trabajar papu.
 
 ## Trabajando
 
+- [ ] crear la tarea para ask
+- [ ] crear el interpolator
+- [ ] crear algo parecido a un object context entre tareas para pasar los valores de ask a otras tareas
+- [ ] mover commandsautoloader a application system.
+
 ## Módulos
 
 Lista de módulos que faltan por hacer.
