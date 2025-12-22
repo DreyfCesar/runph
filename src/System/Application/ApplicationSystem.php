@@ -8,6 +8,7 @@ use Runph\Services\CommandsAutoloader;
 use Runph\System\SystemData;
 use Runph\System\SystemInterface;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -25,6 +26,9 @@ class ApplicationSystem implements SystemInterface
 
         $commandsAutoloader = $container->get(CommandsAutoloader::class);
         $commandsAutoloader->registerCommands($application);
+        $helperSet = $application->getHelperSet();
+
+        $container->set(QuestionHelper::class, fn () => $helperSet->get('question'));
 
         $application->run(
             input: $container->get(InputInterface::class),
