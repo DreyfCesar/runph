@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Runph\Services\Container;
 
+use LogicException;
 use Psr\Container\ContainerInterface;
 use Runph\Services\Container\Contracts\FactoryContainerInterface;
 
@@ -37,12 +38,24 @@ class Container implements ContainerInterface, FactoryContainerInterface
         $service = $id;
 
         if ($this->has($id)) {
-            if (! is_string($this->services[$id])) {
+            $result = $this->services[$id];
+
+            if (! is_string($result)) {
+                if (is_callable($result)) {
+                    $value = $result();
+
+                    if (! is_object($value)) {
+                        throw new LogicException(sprintf('The returned value of function for "%s" must be an object, but got %s.', $id, gettype($value)));
+                    }
+
+                    $result = $this->set($id, $value);
+                }
+
                 /** @var T */
-                return $this->services[$id];
+                return $result;
             }
 
-            $service = $this->services[$id];
+            $service = $result;
         }
 
         /** @var T */
