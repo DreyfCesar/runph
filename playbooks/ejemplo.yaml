@@ -6,3 +6,7 @@ tasks:
 
     - name: Primera tarea
       log: mostrame
+
+    - ask: 
+        message: ¿Qué te pasa?
+        hidden: true
