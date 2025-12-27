@@ -11,6 +11,7 @@ use Runph\Playbook\Contracts\ModuleInterface;
 use Runph\Playbook\Modules\Ask\AskTask;
 use Runph\Playbook\Modules\Ask\Exception\EmptyAnswerException;
 use Runph\Playbook\Modules\Ask\Exception\InvalidAnswerException;
+use Runph\Services\Memory\Contracts\MemoryInterface;
 use stdClass;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,11 +29,15 @@ class AskTaskTest extends TestCase
     /** @var MockObject&OutputInterface */
     private OutputInterface $output;
 
+    /** @var MockObject&MemoryInterface */
+    private MemoryInterface $memory;
+
     protected function setUp(): void
     {
         $this->questionHelper = $this->createMock(QuestionHelper::class);
         $this->input = $this->createMock(InputInterface::class);
         $this->output = $this->createMock(OutputInterface::class);
+        $this->memory = $this->createMock(MemoryInterface::class);
     }
 
     public function testImplementsModuleInterface(): void
@@ -283,13 +288,45 @@ class AskTaskTest extends TestCase
         $task->run();
     }
 
-    private function createAskTask(string $message, string $default = '', bool $hidden = false): AskTask
+    public function testSavesAnswerInMemory(): void
+    {
+        $answer = 'something';
+        $saveKey = 'some_key';
+
+        $this->questionHelper
+            ->method('ask')
+            ->willReturn($answer);
+
+        $this->memory
+            ->expects($this->once())
+            ->method('set')
+            ->with($saveKey, $answer);
+
+        $task = $this->createAskTask('Test', save: $saveKey);
+
+        $task->run();
+    }
+
+    public function testIgnoresSaveIfKeyIsEmpty(): void
+    {
+        $this->memory
+            ->expects($this->never())
+            ->method('set');
+
+        $task = $this->createAskTask('Test', save: '');
+
+        $task->run();
+    }
+
+    private function createAskTask(string $message, string $default = '', bool $hidden = false, string $save = ''): AskTask
     {
         return new AskTask(
             $this->questionHelper,
             $this->input,
             $this->output,
+            $this->memory,
             $message,
+            $save,
             $default,
             $hidden,
         );

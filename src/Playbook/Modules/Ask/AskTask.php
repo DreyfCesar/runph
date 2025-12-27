@@ -7,6 +7,7 @@ namespace Runph\Playbook\Modules\Ask;
 use Runph\Playbook\Contracts\ModuleInterface;
 use Runph\Playbook\Modules\Ask\Exception\EmptyAnswerException;
 use Runph\Playbook\Modules\Ask\Exception\InvalidAnswerException;
+use Runph\Services\Memory\Contracts\MemoryInterface;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,7 +19,9 @@ class AskTask implements ModuleInterface
         private QuestionHelper $questionHelper,
         private InputInterface $input,
         private OutputInterface $output,
+        private MemoryInterface $memory,
         private string $message,
+        private string $save,
         private string $default = '',
         private bool $hidden = false,
     ) {}
@@ -43,6 +46,10 @@ class AskTask implements ModuleInterface
         });
 
         $this->output->writeln('');
-        $this->questionHelper->ask($this->input, $this->output, $question);
+        $answer = $this->questionHelper->ask($this->input, $this->output, $question);
+
+        if (! empty($this->save)) {
+            $this->memory->set($this->save, $answer);
+        }
     }
 }
