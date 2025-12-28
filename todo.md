@@ -4,9 +4,6 @@ A trabajar papu.
 
 ## Trabajando
 
-- [x] crear la tarea para ask
-- [ ] crear el interpolator
-- [ ] crear algo parecido a un object context entre tareas para pasar los valores de ask a otras tareas
 - [ ] mover commandsautoloader a application system.
 
 ## Módulos
@@ -23,7 +20,6 @@ Formato:
 
 #### Prioridad alta
 
-- [ ] `ask`: para hacer preguntas al usuario y guardar el valor y ser reutilizado por otras tareas.
 - [ ] `php`: para ejecutar archivos php.
 - [ ] `copy`: para copiar archivos.
 
