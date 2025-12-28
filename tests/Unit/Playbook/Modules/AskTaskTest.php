@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Playbook\Modules;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -318,7 +319,129 @@ class AskTaskTest extends TestCase
         $task->run();
     }
 
-    private function createAskTask(string $message, string $default = '', bool $hidden = false, string $save = ''): AskTask
+    public function testSetsAutocompleterValuesWhenProvided(): void
+    {
+        $autocomplete = ['option1', 'option2', 'option3'];
+
+        $this->questionHelper
+            ->method('ask')
+            ->with(
+                $this->anything(),
+                $this->anything(),
+                $this->callback(function (Question $question) use ($autocomplete): bool {
+                    $this->assertSame($autocomplete, $question->getAutocompleterValues());
+                    return true;
+                })
+            )
+            ->willReturn('option1');
+
+        $task = $this->createAskTask('Select option', autocomplete: $autocomplete);
+
+        $task->run();
+    }
+
+    public function testDoesNotSetAutocompleterWhenNull(): void
+    {
+        $this->questionHelper
+            ->method('ask')
+            ->with(
+                $this->anything(),
+                $this->anything(),
+                $this->callback(function (Question $question): bool {
+                    $this->assertNull($question->getAutocompleterValues());
+                    return true;
+                })
+            )
+            ->willReturn('answer');
+
+        $task = $this->createAskTask('Test', autocomplete: null);
+
+        $task->run();
+    }
+
+    public function testDoesNotSetAutocompleterWhenEmptyArray(): void
+    {
+        $this->questionHelper
+            ->method('ask')
+            ->with(
+                $this->anything(),
+                $this->anything(),
+                $this->callback(function (Question $question): bool {
+                    $this->assertNull($question->getAutocompleterValues());
+                    return true;
+                })
+            )
+            ->willReturn('answer');
+
+        $task = $this->createAskTask('Test', autocomplete: []);
+
+        $task->run();
+    }
+
+    public function testThrowsExceptionWhenAutocompleteContainsNonString(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Autocomplete values must be string or Stringable, got integer');
+
+        $this->createAskTask('Test', autocomplete: ['valid', 123]);
+    }
+
+    /**
+     * @param mixed[] $invalidAutocomplete
+     */
+    #[DataProvider('invalidAutocompleteTypesProvider')]
+    public function testThrowsExceptionForInvalidAutocompleteTypes(array $invalidAutocomplete, string $expectedType): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Autocomplete values must be string or Stringable, got ' . $expectedType);
+
+        $this->createAskTask('Test', autocomplete: $invalidAutocomplete);
+    }
+
+    /**
+     * @return array<string, array{invalidAutocomplete: array<mixed>, expectedType: string}>
+     */
+    public static function invalidAutocompleteTypesProvider(): array
+    {
+        return [
+            'integer in array' => [
+                'invalidAutocomplete' => ['valid', 42],
+                'expectedType' => 'integer',
+            ],
+            'float in array' => [
+                'invalidAutocomplete' => ['valid', 3.14],
+                'expectedType' => 'double',
+            ],
+            'boolean in array' => [
+                'invalidAutocomplete' => ['valid', true],
+                'expectedType' => 'boolean',
+            ],
+            'array in array' => [
+                'invalidAutocomplete' => ['valid', ['nested']],
+                'expectedType' => 'array',
+            ],
+            'object in array' => [
+                'invalidAutocomplete' => ['valid', new stdClass()],
+                'expectedType' => 'object',
+            ],
+            'null in array' => [
+                'invalidAutocomplete' => ['valid', null],
+                'expectedType' => 'NULL',
+            ],
+        ];
+    }
+
+    public function testValidatesAutocompleteOnConstruction(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->createAskTask('Test', autocomplete: [1, 2, 3]);
+    }
+
+    /**
+     * @param mixed[] $autocomplete
+     */
+    private function createAskTask(string $message, string $default = '', bool $hidden = false, string $save = '', ?array $autocomplete = null): AskTask
     {
         return new AskTask(
             $this->questionHelper,
@@ -329,6 +452,7 @@ class AskTaskTest extends TestCase
             $save,
             $default,
             $hidden,
+            $autocomplete,
         );
     }
 }

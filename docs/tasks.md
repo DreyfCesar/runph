@@ -26,6 +26,9 @@ Esta tarea sirve para hacer preguntas al usuario y almacenar la respuesta en una
   - tipo: `bool`
   - opcional
   - valor por defecto: `false`
+- **autocomlete**
+  - tipo: `string[]`
+  - opcional
 
 Ejemplo de uso:
 
