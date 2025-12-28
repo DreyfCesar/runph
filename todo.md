@@ -4,6 +4,8 @@ A trabajar papu.
 
 ## Trabajando
 
+- [ ] mover commandsautoloader a application system.
+
 ## Módulos
 
 Lista de módulos que faltan por hacer.
@@ -18,7 +20,6 @@ Formato:
 
 #### Prioridad alta
 
-- [ ] `ask`: para hacer preguntas al usuario y guardar el valor y ser reutilizado por otras tareas.
 - [ ] `php`: para ejecutar archivos php.
 - [ ] `copy`: para copiar archivos.
 
